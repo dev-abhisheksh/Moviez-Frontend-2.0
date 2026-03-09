@@ -241,32 +241,6 @@ const MovieDetail = () => {
                                 {movie.overview || 'No description available for this title.'}
                             </p>
                         </section>
-
-                        {/* Cast Gallery */}
-                        {cast.length > 0 && (
-                            <section>
-                                <h2 className="text-2xl font-black text-textMain mb-4">Cast</h2>
-                                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                                    {cast.map((actor) => (
-                                        <div key={actor.id} className="flex-shrink-0 w-28 text-center">
-                                            <img
-                                                src={actor.profile_path
-                                                    ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
-                                                    : AVATAR_FALLBACK
-                                                }
-                                                alt={actor.name}
-                                                className="w-28 h-36 object-cover rounded-xl shadow-md bg-gray-200"
-                                                onError={(e) => {
-                                                    if (e.target.src !== AVATAR_FALLBACK) e.target.src = AVATAR_FALLBACK;
-                                                }}
-                                            />
-                                            <p className="text-sm font-bold text-gray-900 mt-2 truncate">{actor.name}</p>
-                                            <p className="text-xs text-gray-400 truncate">{actor.character}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
                     </div>
 
                     {/* Sidebar Info */}
@@ -291,6 +265,32 @@ const MovieDetail = () => {
                         )}
                     </div>
                 </div>
+
+                {/* Cast Gallery — full width */}
+                {cast.length > 0 && (
+                    <section className="px-8 lg:px-16 mt-1">
+                        <h2 className="text-2xl font-bold text-textMain mb-6">Cast</h2>
+                        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+                            {cast.map((actor) => (
+                                <div key={actor.id} className="flex-shrink-0 w-32 min-w-[120px] text-center">
+                                    <img
+                                        src={actor.profile_path
+                                            ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
+                                            : AVATAR_FALLBACK
+                                        }
+                                        alt={actor.name}
+                                        className="w-32 h-44 object-cover rounded-xl shadow-md bg-gray-200 mx-auto"
+                                        onError={(e) => {
+                                            if (e.target.src !== AVATAR_FALLBACK) e.target.src = AVATAR_FALLBACK;
+                                        }}
+                                    />
+                                    <p className="text-sm font-bold text-gray-900 mt-2 truncate">{actor.name}</p>
+                                    <p className="text-xs text-gray-400 truncate">{actor.character}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
 
                 {/* Recommendations */}
                 <div className="pb-20">
