@@ -86,6 +86,15 @@ const MovieDetail = () => {
 
     const handlePlayTrailer = async () => {
         if (!movie) return;
+
+        // Admin-created movies: use the stored trailer_url (YouTube ID)
+        const isAdminMovie = movie.isAdmin || movie.source === 'admin';
+        if (isAdminMovie && movie.trailer_url) {
+            setYoutubeKey(movie.trailer_url);
+            setIsModalOpen(true);
+            return;
+        }
+
         try {
             const type = movie.media_type || mediaType || 'movie';
             const id = movie.id || movie._id;

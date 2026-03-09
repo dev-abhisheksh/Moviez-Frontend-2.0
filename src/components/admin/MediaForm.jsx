@@ -8,6 +8,8 @@ const MediaForm = ({ editData, onSubmit, onClose }) => {
         overview: '',
         media_type: 'movie',
         release_date: '',
+        trailer_url: '',
+        vote_average: '',
     });
     const [poster, setPoster] = useState(null);
     const [banner, setBanner] = useState(null);
@@ -24,6 +26,8 @@ const MediaForm = ({ editData, onSubmit, onClose }) => {
                 release_date: editData.release_date
                     ? new Date(editData.release_date).toISOString().split('T')[0]
                     : '',
+                trailer_url: editData.trailer_url || '',
+                vote_average: editData.vote_average ?? '',
             });
         }
     }, [editData]);
@@ -36,6 +40,10 @@ const MediaForm = ({ editData, onSubmit, onClose }) => {
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleImgError = (e) => {
+        if (e.target.src !== FALLBACK) e.target.src = FALLBACK;
     };
 
     const handleSubmit = async (e) => {
@@ -55,6 +63,8 @@ const MediaForm = ({ editData, onSubmit, onClose }) => {
             formData.append('overview', form.overview);
             formData.append('media_type', form.media_type);
             if (form.release_date) formData.append('release_date', form.release_date);
+            if (form.trailer_url) formData.append('trailer_url', form.trailer_url);
+            if (form.vote_average !== '') formData.append('vote_average', form.vote_average);
             if (poster) formData.append('poster', poster);
             if (banner) formData.append('banner', banner);
 
@@ -99,26 +109,38 @@ const MediaForm = ({ editData, onSubmit, onClose }) => {
                         <textarea name="overview" value={form.overview} onChange={handleChange} placeholder="Brief description..." rows={3} className={`${inputClass} resize-none`} />
                     </div>
 
-                    {/* Media Type */}
-                    <div className="flex flex-col gap-1.5">
-                        <label className={labelClass}>Media Type</label>
-                        <select name="media_type" value={form.media_type} onChange={handleChange} className={inputClass}>
-                            <option value="movie">Movie</option>
-                            <option value="tv">TV Show</option>
-                        </select>
+                    {/* Media Type & Release Date — side by side */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1.5">
+                            <label className={labelClass}>Media Type</label>
+                            <select name="media_type" value={form.media_type} onChange={handleChange} className={inputClass}>
+                                <option value="movie">Movie</option>
+                                <option value="tv">TV Show</option>
+                            </select>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <label className={labelClass}>Release Date</label>
+                            <input type="date" name="release_date" value={form.release_date} onChange={handleChange} className={inputClass} />
+                        </div>
                     </div>
 
-                    {/* Release Date */}
-                    <div className="flex flex-col gap-1.5">
-                        <label className={labelClass}>Release Date</label>
-                        <input type="date" name="release_date" value={form.release_date} onChange={handleChange} className={inputClass} />
+                    {/* Trailer Link & Rating — side by side */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1.5">
+                            <label className={labelClass}>Trailer Link</label>
+                            <input type="text" name="trailer_url" value={form.trailer_url} onChange={handleChange} placeholder="Paste YouTube URL here" className={inputClass} />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <label className={labelClass}>Rating</label>
+                            <input type="number" name="vote_average" value={form.vote_average} onChange={handleChange} min="0" max="10" step="0.1" placeholder="0 – 10" className={inputClass} />
+                        </div>
                     </div>
 
                     {/* Poster */}
                     <div className="flex flex-col gap-1.5">
                         <label className={labelClass}>Poster Image</label>
                         {editData?.poster_path && (
-                            <img src={editData.poster_path || FALLBACK} alt="Current poster" className="w-20 h-28 object-cover rounded-lg border" onError={(e) => { e.target.src = FALLBACK; }} />
+                            <img src={editData.poster_path || FALLBACK} alt="Current poster" className="w-20 h-28 object-cover rounded-lg border" onError={handleImgError} />
                         )}
                         <input type="file" accept="image/*" onChange={(e) => setPoster(e.target.files[0])}
                             className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 file:cursor-pointer" />
