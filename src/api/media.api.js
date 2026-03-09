@@ -13,5 +13,8 @@ export const getMediaTrailer = (type, id) => API.get(`/media/trailer/${type}/${i
 // Fetch Single Details
 export const getMediaDetails = (id) => API.get(`/media/${id}`);
 
+// Fetch Cast / Credits
+export const getMovieCredits = (type, id) => API.get(`/media/credits/${type}/${id}`);
+
 // Admin
 export const createMediaAdmin = (formData) => API.post('/media/admin/create', formData, { headers: { 'Content-Type': 'multipart/form-data' } });

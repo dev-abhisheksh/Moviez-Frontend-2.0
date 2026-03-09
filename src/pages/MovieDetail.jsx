@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getMediaDetails, getMediaTrailer } from '../api/media.api';
+import { getMediaDetails, getMediaTrailer, getMovieCredits } from '../api/media.api';
 import { toggleFavourite, checkFavouriteStatus } from '../api/favourite.api';
 import { addToHistory } from '../api/history.api';
 import TrailerModal from '../components/movies/TrailerModal';
@@ -10,6 +10,7 @@ import Button from '../components/common/Button';
 
 const FALLBACK_BACKDROP = 'https://via.placeholder.com/1920x1080?text=MovieHub+Content';
 const ERROR_BACKDROP = 'https://images.placeholders.dev/?width=1920&height=1080&text=Content+Unavailable&bgColor=%23111';
+const AVATAR_FALLBACK = 'https://images.placeholders.dev/?width=185&height=278&text=No+Photo&bgColor=%23333';
 
 const MovieDetail = () => {
     const { mediaId, mediaType } = useParams();
@@ -19,6 +20,7 @@ const MovieDetail = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [youtubeKey, setYoutubeKey] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
+    const [cast, setCast] = useState([]);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -36,6 +38,21 @@ const MovieDetail = () => {
 
         if (mediaId) fetchDetails();
     }, [mediaId]);
+
+    // Fetch cast (TMDB only)
+    useEffect(() => {
+        const fetchCredits = async () => {
+            try {
+                const type = mediaType || 'movie';
+                const { data } = await getMovieCredits(type, mediaId);
+                setCast(data.cast || []);
+            } catch (err) {
+                console.error('Credits fetch error:', err);
+            }
+        };
+
+        if (mediaId && mediaType) fetchCredits();
+    }, [mediaId, mediaType]);
 
     // Check favourite status
     useEffect(() => {
@@ -215,6 +232,32 @@ const MovieDetail = () => {
                                 {movie.overview || 'No description available for this title.'}
                             </p>
                         </section>
+
+                        {/* Cast Gallery */}
+                        {cast.length > 0 && (
+                            <section>
+                                <h2 className="text-2xl font-black text-textMain mb-4">Cast</h2>
+                                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                                    {cast.map((actor) => (
+                                        <div key={actor.id} className="flex-shrink-0 w-28 text-center">
+                                            <img
+                                                src={actor.profile_path
+                                                    ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
+                                                    : AVATAR_FALLBACK
+                                                }
+                                                alt={actor.name}
+                                                className="w-28 h-36 object-cover rounded-xl shadow-md bg-gray-200"
+                                                onError={(e) => {
+                                                    if (e.target.src !== AVATAR_FALLBACK) e.target.src = AVATAR_FALLBACK;
+                                                }}
+                                            />
+                                            <p className="text-sm font-bold text-gray-900 mt-2 truncate">{actor.name}</p>
+                                            <p className="text-xs text-gray-400 truncate">{actor.character}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
                     </div>
 
                     {/* Sidebar Info */}
