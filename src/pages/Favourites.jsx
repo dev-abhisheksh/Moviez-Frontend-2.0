@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getFavourites } from '../api/favourite.api';
 import MovieGrid from '../components/movies/MovieGrid';
 import { MovieRowSkeleton } from '../components/common/Skeleton';
+import EmptyState from '../components/common/EmptyState';
 
 const Favourites = () => {
     const [favourites, setFavourites] = useState([]);
@@ -29,16 +30,27 @@ const Favourites = () => {
         <div className="min-h-screen bg-background pt-24 px-6 lg:px-16">
             <h1 className="text-3xl font-black mb-8 text-textMain border-l-4 border-brand pl-3">My Favourites</h1>
 
-            {error && <div className="text-center py-10 text-red-500 font-bold">{error}</div>}
+            {error && (
+                <EmptyState
+                    icon="⚠️"
+                    title="Couldn't load favourites"
+                    message={error}
+                    actionText="Refresh"
+                    onAction={() => window.location.reload()}
+                />
+            )}
 
             {loading ? (
                 <MovieRowSkeleton />
-            ) : favourites.length === 0 ? (
-                <div className="text-center py-20 text-gray-500">
-                    <p className="text-xl font-bold">No favourites yet</p>
-                    <p>Start adding movies you love!</p>
-                </div>
-            ) : (
+            ) : !error && favourites.length === 0 ? (
+                <EmptyState
+                    icon="🍿"
+                    title="Your watchlist is feeling a bit lonely"
+                    message="Start adding movies and TV shows you love!"
+                    actionText="Explore Trending"
+                    actionLink="/"
+                />
+            ) : !error && (
                 <MovieGrid movies={favourites} />
             )}
         </div>

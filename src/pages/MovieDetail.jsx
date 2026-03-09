@@ -4,10 +4,12 @@ import { getMediaDetails, getMediaTrailer } from '../api/media.api';
 import { toggleFavourite, checkFavouriteStatus } from '../api/favourite.api';
 import { addToHistory } from '../api/history.api';
 import TrailerModal from '../components/movies/TrailerModal';
+import EmptyState from '../components/common/EmptyState';
 import MovieRow from '../components/movies/MovieRow';
 import Button from '../components/common/Button';
 
 const FALLBACK_BACKDROP = 'https://via.placeholder.com/1920x1080?text=MovieHub+Content';
+const ERROR_BACKDROP = 'https://images.placeholders.dev/?width=1920&height=1080&text=Content+Unavailable&bgColor=%23111';
 
 const MovieDetail = () => {
     const { mediaId, mediaType } = useParams();
@@ -90,13 +92,47 @@ const MovieDetail = () => {
     };
 
     const handleImgError = (e) => {
-        e.target.onerror = null;
-        e.target.src = FALLBACK_BACKDROP;
+        if (e.target.src !== FALLBACK_BACKDROP && e.target.src !== ERROR_BACKDROP) {
+            e.target.src = FALLBACK_BACKDROP;
+        }
     };
 
-    if (loading) return <div className="w-full h-[70vh] bg-gray-200 animate-pulse" />;
-    if (error) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">{error}</div>;
-    if (!movie) return null;
+    if (loading) return (
+        <div className="bg-background min-h-screen">
+            <div className="w-full h-[60vh] lg:h-[80vh] bg-gray-900 animate-pulse" />
+            <div className="px-8 lg:px-16 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div className="lg:col-span-2 space-y-4">
+                    <div className="h-10 bg-gray-200 rounded-lg w-1/3 animate-pulse mb-6" />
+                    <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
+                    <div className="h-4 bg-gray-200 rounded w-5/6 animate-pulse" />
+                    <div className="h-4 bg-gray-200 rounded w-4/5 animate-pulse" />
+                </div>
+            </div>
+        </div>
+    );
+
+    if (error || !movie) return (
+        <div className="bg-background min-h-screen flex flex-col pt-20">
+            <div className="relative flex-1 flex items-center justify-center">
+                <div className="absolute inset-0 z-0">
+                    <img src={ERROR_BACKDROP} alt="error" className="w-full h-full object-cover opacity-20" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+                </div>
+                <div className="relative z-10 w-full">
+                    <EmptyState
+                        icon="💔"
+                        title="Oops! We couldn't find that title"
+                        message={error || "The movie you're looking for doesn't exist or has been removed."}
+                        actionText="Explore Trending"
+                        actionLink="/"
+                    />
+                </div>
+            </div>
+            <div className="relative z-10 pb-20 mt-10 border-t border-gray-100/10">
+                <MovieRow title="Top Picks For You" endpoint="/media/trending/movie" />
+            </div>
+        </div>
+    );
 
     const isAdmin = movie.isAdmin || movie.source === 'admin';
 

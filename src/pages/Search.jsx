@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { searchMedia } from '../api/media.api';
 import MovieGrid from '../components/movies/MovieGrid';
 import { MovieRowSkeleton } from '../components/common/Skeleton';
+import EmptyState from '../components/common/EmptyState';
 
 const Search = () => {
     const [query, setQuery] = useState('');
@@ -56,22 +57,31 @@ const Search = () => {
 
             {/* Error */}
             {error && (
-                <div className="text-center py-10 text-red-500 font-bold">{error}</div>
+                <EmptyState
+                    icon="⚠️"
+                    title="Something went wrong"
+                    message={error}
+                    actionText="Try Again"
+                    onAction={() => setQuery(query)}
+                />
             )}
 
             {/* Results */}
             {loading && results.length === 0 ? (
                 <MovieRowSkeleton />
             ) : (
-                <MovieGrid movies={results} />
+                !error && <MovieGrid movies={results} />
             )}
 
             {/* Empty State */}
             {!loading && query.length > 2 && results.length === 0 && !error && (
-                <div className="text-center py-20 text-gray-500">
-                    <p className="text-xl font-bold">No results found for "{query}"</p>
-                    <p>Try searching for something else!</p>
-                </div>
+                <EmptyState
+                    icon="🔍"
+                    title={`No results found for "${query}"`}
+                    message="Try searching for another movie, TV show, or actor."
+                    actionText="Clear Search"
+                    onAction={() => setQuery('')}
+                />
             )}
         </div>
     );
