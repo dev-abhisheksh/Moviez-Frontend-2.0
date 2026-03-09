@@ -9,7 +9,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-const FALLBACK_POSTER = 'https://via.placeholder.com/500x750?text=No+Image';
+const FALLBACK = 'https://images.placeholders.dev/?width=500&height=750&text=No+Image&bgColor=%23222';
 
 const MovieCarousel = ({ title, endpoint, minRating = 0 }) => {
     const [movies, setMovies] = useState([]);
@@ -21,18 +21,44 @@ const MovieCarousel = ({ title, endpoint, minRating = 0 }) => {
     useEffect(() => {
         if (!inView || fetched || !endpoint) return;
 
-        const fetchMovies = async () => {
+        const fetchCarouselData = async () => {
             try {
                 setLoading(true);
-                const { data } = await API.get(endpoint);
-                let results = data.results || [];
 
-                // Filter by minimum rating if specified
-                if (minRating > 0) {
-                    results = results.filter(m => (m.vote_average || 0) > minRating);
+                // Build page URLs — fetch 2 pages for more variety
+                const separator = endpoint.includes('?') ? '&' : '?';
+                const res1 = await API.get(`${endpoint}${separator}page=1`);
+                const res2 = await API.get(`${endpoint}${separator}page=2`);
+
+                const combined = [
+                    ...(res1.data.results || []),
+                    ...(res2.data.results || []),
+                ];
+
+                // De-duplicate by id
+                const seen = new Set();
+                const unique = combined.filter((m) => {
+                    const id = m.id || m._id;
+                    if (seen.has(id)) return false;
+                    seen.add(id);
+                    return true;
+                });
+
+                // Sort by rating descending
+                const sorted = unique.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+
+                // Filter by minimum rating
+                let filtered = minRating > 0
+                    ? sorted.filter((m) => (m.vote_average || 0) >= minRating)
+                    : sorted;
+
+                // Fallback: if fewer than 6 items pass the filter, use top 10 from sorted
+                if (filtered.length < 6) {
+                    filtered = sorted.slice(0, 10);
                 }
 
-                setMovies(results);
+                // Cap at 20 for performance
+                setMovies(filtered.slice(0, 20));
             } catch (err) {
                 console.error(`Error fetching ${title}:`, err);
             } finally {
@@ -41,18 +67,19 @@ const MovieCarousel = ({ title, endpoint, minRating = 0 }) => {
             }
         };
 
-        fetchMovies();
+        fetchCarouselData();
     }, [inView, fetched, endpoint, title, minRating]);
 
     const getPoster = (movie) => {
-        if (!movie?.poster_path) return FALLBACK_POSTER;
+        if (!movie?.poster_path) return FALLBACK;
         if (movie?.isAdmin) return movie.poster_path;
         return `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
     };
 
     const handleImgError = (e) => {
-        e.target.onerror = null;
-        e.target.src = FALLBACK_POSTER;
+        if (e.target.src !== FALLBACK) {
+            e.target.src = FALLBACK;
+        }
     };
 
     return (
@@ -78,6 +105,7 @@ const MovieCarousel = ({ title, endpoint, minRating = 0 }) => {
                     spaceBetween={20}
                     slidesPerView={2}
                     navigation
+                    loop={movies.length >= 4}
                     pagination={{ clickable: true }}
                     autoplay={{ delay: 4000, disableOnInteraction: false }}
                     breakpoints={{

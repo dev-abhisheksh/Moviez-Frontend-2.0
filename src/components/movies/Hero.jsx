@@ -71,7 +71,6 @@ const Hero = () => {
 
     return (
         <>
-            {/* CSS gradient background as fallback — text stays readable even if image fails */}
             <div
                 className="relative w-full h-[70vh] lg:h-[85vh] overflow-hidden"
                 style={{ background: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)' }}
@@ -118,7 +117,6 @@ const Hero = () => {
                 </div>
             </div>
 
-            {/* Trailer Modal Integration */}
             <TrailerModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

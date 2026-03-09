@@ -9,11 +9,12 @@ import MovieDetail from './pages/MovieDetail';
 import Favourites from './pages/Favourites';
 import ProfilePage from './pages/ProfilePage';
 import MediaUpload from './pages/Admin/MediaUpload';
+import Dashboard from './pages/Admin/Dashboard';
 
 function App() {
   return (
     <Router>
-      <div className="font-sans text-textMain min-h-screen bg-background">
+      <div className="font-sans text-textMain min-h-screen bg-background overflow-x-hidden">
         <Navbar />
 
         <Routes>
@@ -25,6 +26,7 @@ function App() {
           <Route path="/favourites" element={<Favourites />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin/upload" element={<MediaUpload />} />
+          <Route path="/admin/dashboard" element={<Dashboard />} />
         </Routes>
       </div>
     </Router>

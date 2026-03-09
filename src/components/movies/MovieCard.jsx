@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toggleFavourite, checkFavouriteStatus } from '../../api/favourite.api';
 
-const FALLBACK_POSTER = 'https://images.placeholders.dev/?width=500&height=750&text=No+Image&bgColor=%23222';
+const FALLBACK = 'https://images.placeholders.dev/?width=500&height=750&text=No+Image&bgColor=%23222';
+const FALLBACK_POSTER = FALLBACK;
 
 const MovieCard = ({ movie }) => {
     const [isLiked, setIsLiked] = useState(false);

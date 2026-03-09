@@ -36,7 +36,7 @@ const MovieRow = ({ title, endpoint, minRating = 0 }) => {
     }, [inView, fetched, endpoint, title, minRating]);
 
     return (
-        <div ref={ref} className="my-8 px-8 lg:px-16">
+        <div ref={ref} className="my-15 px-8 lg:px-16">
             <h2 className="text-xl lg:text-2xl font-black mb-4 text-textMain border-l-4 border-brand pl-3 uppercase tracking-tighter">
                 {title}
             </h2>

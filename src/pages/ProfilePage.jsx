@@ -66,8 +66,9 @@ const ProfilePage = () => {
                 </div>
             </div>
 
-            {/* Watch History */}
+
             <div>
+                <h2>Clear History</h2>
                 <MovieRow title="Watch History" endpoint="/history" />
             </div>
         </div>
