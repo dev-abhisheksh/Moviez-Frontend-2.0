@@ -15,6 +15,7 @@ const Home = () => {
                 <MovieCarousel title="High Rated Anime" endpoint="/media/search?q=anime" minRating={7.5} />
 
                 <MovieRow title="TV Shows" endpoint="/media/trending/tv" />
+                {/* <MovieRow title="High Rated Movies" endpoint="/media/search?q=movies" minRating={7.5} /> */}
             </div>
         </div>
     );

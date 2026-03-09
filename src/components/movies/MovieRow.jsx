@@ -3,7 +3,7 @@ import { useInView } from 'react-intersection-observer';
 import MovieCard from './MovieCard';
 import { API } from '../../api/media.api';
 
-const MovieRow = ({ title, endpoint }) => {
+const MovieRow = ({ title, endpoint, minRating = 0 }) => {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(false);
     const [fetched, setFetched] = useState(false);
@@ -17,7 +17,13 @@ const MovieRow = ({ title, endpoint }) => {
             try {
                 setLoading(true);
                 const { data } = await API.get(endpoint);
-                setMovies(data.results || []);
+                let results = data.results || [];
+
+                if (minRating > 0) {
+                    results = results.filter(m => (m.vote_average || 0) > minRating);
+                }
+
+                setMovies(results);
             } catch (err) {
                 console.error(`Error fetching ${title}:`, err);
             } finally {
@@ -27,7 +33,7 @@ const MovieRow = ({ title, endpoint }) => {
         };
 
         fetchMovies();
-    }, [inView, fetched, endpoint, title]);
+    }, [inView, fetched, endpoint, title, minRating]);
 
     return (
         <div ref={ref} className="my-8 px-8 lg:px-16">

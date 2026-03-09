@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getMediaTrailer, getTrendingMedia } from '../../api/media.api';
 import { addToHistory } from '../../api/history.api';
 import TrailerModal from '../common/Modal';
@@ -10,6 +11,7 @@ const Hero = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [youtubeKey, setYoutubeKey] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchHeroMovie = async () => {
@@ -100,7 +102,16 @@ const Hero = () => {
                         >
                             <span>▶</span> Play Trailer
                         </button>
-                        <button className="flex items-center gap-2 bg-white/80 backdrop-blur-sm text-textMain border border-gray-200 px-8 py-3 rounded-md font-bold hover:bg-gray-100 transition">
+                        <button
+                            onClick={() => {
+                                if (movie) {
+                                    const type = movie.media_type || 'movie';
+                                    const id = movie.id || movie._id;
+                                    navigate(`/watch/${type}/${id}`);
+                                }
+                            }}
+                            className="flex items-center gap-2 bg-white/80 backdrop-blur-sm text-textMain border border-gray-200 px-8 py-3 rounded-md font-bold hover:bg-gray-100 transition"
+                        >
                             ⓘ More Info
                         </button>
                     </div>
