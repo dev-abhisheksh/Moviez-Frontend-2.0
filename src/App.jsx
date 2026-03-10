@@ -8,6 +8,7 @@ import RegisterPage from './pages/Auth/RegisterPage';
 import SearchPage from './pages/Search';
 import MovieDetail from './pages/MovieDetail';
 import Favourites from './pages/Favourites';
+import History from './pages/History';
 import ProfilePage from './pages/ProfilePage';
 import MediaUpload from './pages/Admin/MediaUpload';
 import Dashboard from './pages/Admin/Dashboard';
@@ -41,6 +42,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Favourites />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <History />
             </ProtectedRoute>
           }
         />

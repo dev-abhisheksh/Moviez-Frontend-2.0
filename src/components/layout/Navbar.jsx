@@ -21,6 +21,7 @@ const Navbar = () => {
         { to: '/', label: 'Home' },
         { to: '/search', label: 'Search' },
         { to: '/favourites', label: 'My List' },
+        { to: '/history', label: 'History' },
     ];
 
     return (
