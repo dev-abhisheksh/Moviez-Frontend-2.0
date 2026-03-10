@@ -30,10 +30,17 @@ const MovieCarousel = ({ title, endpoint, minRating = 0 }) => {
                 const res1 = await API.get(`${endpoint}${separator}page=1`);
                 const res2 = await API.get(`${endpoint}${separator}page=2`);
 
+                // Determine the default media_type from the endpoint context
+                const isTvEndpoint = endpoint.includes('/tv') || endpoint.includes('q=anime');
+                const defaultType = isTvEndpoint ? 'tv' : 'movie';
+
                 const combined = [
                     ...(res1.data.results || []),
                     ...(res2.data.results || []),
-                ];
+                ].map(item => ({
+                    ...item,
+                    media_type: item.media_type || defaultType,
+                }));
 
                 // De-duplicate by id
                 const seen = new Set();
@@ -117,7 +124,8 @@ const MovieCarousel = ({ title, endpoint, minRating = 0 }) => {
                 >
                     {movies.map((movie) => {
                         const id = movie.id || movie._id;
-                        const mediaType = movie.media_type || 'movie';
+                        const isAdmin = movie.isAdmin || movie.source === 'admin';
+                        const mediaType = isAdmin ? 'admin' : (movie.media_type || 'movie');
 
                         return (
                             <SwiperSlide key={id}>

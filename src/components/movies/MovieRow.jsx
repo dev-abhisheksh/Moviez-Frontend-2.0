@@ -19,6 +19,16 @@ const MovieRow = ({ title, endpoint, minRating = 0 }) => {
                 const { data } = await API.get(endpoint);
                 let results = data.results || [];
 
+                // Determine the default media_type from the endpoint context
+                const isTvEndpoint = endpoint.includes('/tv') || endpoint.includes('q=anime');
+                const defaultType = isTvEndpoint ? 'tv' : 'movie';
+
+                // Inject media_type if missing from API response
+                results = results.map(item => ({
+                    ...item,
+                    media_type: item.media_type || defaultType,
+                }));
+
                 if (minRating > 0) {
                     results = results.filter(m => (m.vote_average || 0) > minRating);
                 }

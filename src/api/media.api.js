@@ -10,8 +10,8 @@ export const searchMedia = (query) => API.get(`/media/search?q=${query}`);
 // Fetch Trailer
 export const getMediaTrailer = (type, id) => API.get(`/media/trailer/${type}/${id}`);
 
-// Fetch Single Details
-export const getMediaDetails = (id) => API.get(`/media/${id}`);
+// Fetch Single Details — type is 'movie', 'tv', or 'admin'
+export const getMediaDetails = (id, type = 'movie') => API.get(`/media/${type}/${id}`);
 
 // Fetch Cast / Credits
 export const getMovieCredits = (type, id) => API.get(`/media/credits/${type}/${id}`);

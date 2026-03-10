@@ -10,11 +10,12 @@ const MovieCard = ({ movie }) => {
     const [animating, setAnimating] = useState(false);
 
     const id = movie?.id || movie?._id;
-    const mediaType = movie?.media_type || 'movie';
+    const isAdmin = movie?.isAdmin || movie?.source === 'admin';
+    const mediaType = isAdmin ? 'admin' : (movie?.media_type || 'movie');
 
     const getPosterUrl = () => {
         if (!movie?.poster_path) return FALLBACK_POSTER;
-        if (movie?.isAdmin) return movie.poster_path;
+        if (isAdmin) return movie.poster_path;
         return `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
     };
 
@@ -22,7 +23,7 @@ const MovieCard = ({ movie }) => {
     useEffect(() => {
         const checkStatus = async () => {
             try {
-                const { data } = await checkFavouriteStatus(id, mediaType);
+                const { data } = await checkFavouriteStatus(id, mediaType === 'admin' ? (movie?.media_type || 'movie') : mediaType);
                 setIsLiked(data.isFavourite);
             } catch (err) {
                 // silently fail — user may not be logged in
@@ -36,7 +37,8 @@ const MovieCard = ({ movie }) => {
         e.preventDefault();
         e.stopPropagation();
         try {
-            await toggleFavourite(id, mediaType);
+            const favType = mediaType === 'admin' ? (movie?.media_type || 'movie') : mediaType;
+            await toggleFavourite(id, favType);
             setIsLiked(!isLiked);
             setAnimating(true);
             setTimeout(() => setAnimating(false), 300);

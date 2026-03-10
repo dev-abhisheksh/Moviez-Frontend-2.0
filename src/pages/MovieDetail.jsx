@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { getMediaDetails, getMediaTrailer, getMovieCredits } from '../api/media.api';
 import { toggleFavourite, checkFavouriteStatus } from '../api/favourite.api';
 import { addToHistory } from '../api/history.api';
 import TrailerModal from '../components/movies/TrailerModal';
+import VideoPlayer from '../components/movies/VideoPlayer';
 import EmptyState from '../components/common/EmptyState';
 import MovieRow from '../components/movies/MovieRow';
 import Button from '../components/common/Button';
@@ -21,13 +22,24 @@ const MovieDetail = () => {
     const [youtubeKey, setYoutubeKey] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
     const [cast, setCast] = useState([]);
+    const [showPlayer, setShowPlayer] = useState(false);
 
     useEffect(() => {
         const fetchDetails = async () => {
             try {
                 setLoading(true);
-                const { data } = await getMediaDetails(mediaId);
-                setMovie(data.media || data);
+                const type = mediaType || 'movie';
+                const { data } = await getMediaDetails(mediaId, type);
+                const media = data.media || data;
+
+                // Validate that the returned content matches the requested ID
+                const returnedId = String(media.id || media._id);
+                if (returnedId !== String(mediaId)) {
+                    setError('Could not load details — content mismatch.');
+                    return;
+                }
+
+                setMovie(media);
             } catch (err) {
                 console.error('Detail fetch error:', err);
                 setError('Could not load movie details.');
@@ -37,7 +49,7 @@ const MovieDetail = () => {
         };
 
         if (mediaId) fetchDetails();
-    }, [mediaId]);
+    }, [mediaId, mediaType]);
 
     // Fetch cast (TMDB only)
     useEffect(() => {
@@ -117,6 +129,13 @@ const MovieDetail = () => {
         }
     };
 
+    const handlePlayerEnded = useCallback(() => {
+        const type = mediaType || 'movie';
+        addToHistory(mediaId, type).catch((err) =>
+            console.error('Failed to mark as watched:', err)
+        );
+    }, [mediaId, mediaType]);
+
     const handleImgError = (e) => {
         if (e.target.src !== FALLBACK_BACKDROP && e.target.src !== ERROR_BACKDROP) {
             e.target.src = FALLBACK_BACKDROP;
@@ -187,50 +206,79 @@ const MovieDetail = () => {
     return (
         <>
             <div className="bg-background min-h-screen">
-                {/* Backdrop & Main Info */}
-                <div className="relative h-[60vh] lg:h-[80vh] w-full bg-black">
-                    <img
-                        src={getBackdropUrl()}
-                        className="w-full h-full object-cover opacity-60"
-                        alt="backdrop"
-                        onError={handleImgError}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+                {/* ─── VidKing Player (replaces hero when active) ─── */}
+                {showPlayer && (
+                    <div className="w-full bg-black">
+                        <VideoPlayer
+                            tmdbId={movie.id || movie._id}
+                            type={mediaType || 'movie'}
+                            season={1}
+                            episode={1}
+                            onEnded={handlePlayerEnded}
+                            onClose={() => setShowPlayer(false)}
+                        />
+                    </div>
+                )}
 
-                    <div className="absolute bottom-10 left-0 px-8 lg:px-16 w-full max-w-4xl space-y-4">
-                        {genres.length > 0 && (
-                            <div className="flex items-center gap-3 text-tmdbBlue text-white font-bold text-sm uppercase tracking-widest">
-                                {genres.join(' • ')}
-                            </div>
-                        )}
-                        <h1 className="text-4xl lg:text-7xl text-white font-black text-textMain tracking-tighter">
-                            {movie.title || movie.name}
-                        </h1>
-                        {movie.tagline && (
-                            <p className="italic text-white text-lg lg:text-xl font-medium">"{movie.tagline}"</p>
-                        )}
+                {/* ─── Backdrop & Main Info (hidden when player is active) ─── */}
+                {!showPlayer && (
+                    <div className="relative h-[60vh] lg:h-[80vh] w-full bg-black">
+                        <img
+                            src={getBackdropUrl()}
+                            className="w-full h-full object-cover opacity-60"
+                            alt="backdrop"
+                            onError={handleImgError}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
 
-                        <div className="flex flex-wrap items-center gap-6 mt-6">
-                            <Button onClick={handlePlayTrailer} className="px-10 py-4 shadow-xl bg-white text-black">
-                                ▶ Watch Trailer
-                            </Button>
-                            <button
-                                onClick={handleToggleFavourite}
-                                className="flex items-center gap-2 bg-white border-2 border-gray-200 p-3 rounded-full hover:bg-gray-50 transition group"
-                            >
-                                <span className={`text-2xl group-hover:scale-125 transition-transform ${isLiked ? 'text-red-500' : 'text-gray-400'}`}>
-                                    ❤
-                                </span>
-                            </button>
-                            {movie.vote_average > 0 && (
-                                <div className="flex flex-col border-l-2 border-gray-200 pl-6">
-                                    <span className="text-sm text-white font-bold uppercase">Rating</span>
-                                    <span className="text-xl font-black text-white">★ {movie.vote_average?.toFixed(1)}</span>
+                        <div className="absolute bottom-10 left-0 px-8 lg:px-16 w-full max-w-4xl space-y-4">
+                            {genres.length > 0 && (
+                                <div className="flex items-center gap-3 text-tmdbBlue text-white font-bold text-sm uppercase tracking-widest">
+                                    {genres.join(' • ')}
                                 </div>
                             )}
+                            <h1 className="text-4xl lg:text-7xl text-white font-black text-textMain tracking-tighter">
+                                {movie.title || movie.name}
+                            </h1>
+                            {movie.tagline && (
+                                <p className="italic text-white text-lg lg:text-xl font-medium">"{movie.tagline}"</p>
+                            )}
+
+                            <div className="flex flex-wrap items-center gap-4 mt-6">
+                                {/* ▶ Play — opens the VidKing player */}
+                                <Button
+                                    onClick={() => setShowPlayer(true)}
+                                    className="px-10 py-4 shadow-xl bg-brand text-white hover:bg-red-700 transition"
+                                >
+                                    ▶ Play
+                                </Button>
+
+                                {/* 🎬 Trailer — opens the existing YouTube modal */}
+                                <Button
+                                    onClick={handlePlayTrailer}
+                                    className="px-8 py-4 shadow-xl bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 transition"
+                                >
+                                    🎬 Trailer
+                                </Button>
+
+                                <button
+                                    onClick={handleToggleFavourite}
+                                    className="flex items-center gap-2 bg-white border-2 border-gray-200 p-3 rounded-full hover:bg-gray-50 transition group"
+                                >
+                                    <span className={`text-2xl group-hover:scale-125 transition-transform ${isLiked ? 'text-red-500' : 'text-gray-400'}`}>
+                                        ❤
+                                    </span>
+                                </button>
+                                {movie.vote_average > 0 && (
+                                    <div className="flex flex-col border-l-2 border-gray-200 pl-6">
+                                        <span className="text-sm text-white font-bold uppercase">Rating</span>
+                                        <span className="text-xl font-black text-white">★ {movie.vote_average?.toFixed(1)}</span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* Detailed Info */}
                 <div className="px-8 lg:px-16 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -241,6 +289,19 @@ const MovieDetail = () => {
                                 {movie.overview || 'No description available for this title.'}
                             </p>
                         </section>
+
+                        {/* Watch Now CTA */}
+                        {!showPlayer && (
+                            <button
+                                onClick={() => setShowPlayer(true)}
+                                className="flex items-center gap-3 w-full sm:w-auto px-10 py-4 bg-brand text-white font-bold text-lg rounded-xl shadow-lg hover:bg-red-700 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
+                                Watch Now
+                            </button>
+                        )}
                     </div>
 
                     {/* Sidebar Info */}

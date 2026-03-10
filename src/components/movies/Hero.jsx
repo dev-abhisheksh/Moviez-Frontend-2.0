@@ -104,7 +104,8 @@ const Hero = () => {
                         <button
                             onClick={() => {
                                 if (movie) {
-                                    const type = movie.media_type || 'movie';
+                                    const isAdminItem = movie.isAdmin || movie.source === 'admin';
+                                    const type = isAdminItem ? 'admin' : (movie.media_type || 'movie');
                                     const id = movie.id || movie._id;
                                     navigate(`/watch/${type}/${id}`);
                                 }
