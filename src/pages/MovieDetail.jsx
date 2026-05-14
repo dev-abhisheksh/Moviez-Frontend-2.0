@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getMediaDetails, getMediaTrailer, getMovieCredits, getRecommendations } from '../api/media.api';
 import { toggleFavourite, checkFavouriteStatus } from '../api/favourite.api';
@@ -41,6 +41,7 @@ const MovieDetail = () => {
     const [cast, setCast] = useState([]);
     const [recommendations, setRecommendations] = useState([]);
     const [showPlayer, setShowPlayer] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -377,13 +378,30 @@ const MovieDetail = () => {
                                 <button
                                     onClick={handleToggleFavourite}
                                     className={`flex items-center justify-center w-12 h-12 rounded-full backdrop-blur-md border transition-all duration-300 hover:scale-110 active:scale-95 ${isLiked
-                                            ? 'bg-brand/20 border-brand/40 shadow-lg shadow-brand/20'
-                                            : 'bg-white/10 border-white/20 hover:bg-white/20'
+                                        ? 'bg-brand/20 border-brand/40 shadow-lg shadow-brand/20'
+                                        : 'bg-white/10 border-white/20 hover:bg-white/20'
                                         }`}
                                 >
                                     <span className={`text-xl ${isLiked ? 'text-brand' : 'text-white/70'}`}>
                                         ❤
                                     </span>
+                                </button>
+
+                                {/* ⬇ Download */}
+                                <button
+                                    onClick={() => {
+                                        const id = movie.id || movie._id;
+                                        const type = movie.media_type || mediaType || 'movie';
+                                        navigate(`/download/${type}/${id}`);
+                                    }}
+                                    className="flex items-center justify-center w-12 h-12 rounded-full backdrop-blur-md border bg-white/10 border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-110 active:scale-95"
+                                    title="Download"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                                        <polyline strokeLinecap="round" strokeLinejoin="round" points="7 10 12 15 17 10" />
+                                        <line strokeLinecap="round" x1="12" y1="15" x2="12" y2="3" />
+                                    </svg>
                                 </button>
 
                                 {/* Rating badge */}
@@ -421,8 +439,32 @@ const MovieDetail = () => {
                                 {movie.overview || 'No description available for this title.'}
                             </p>
                         </motion.section>
-
-                        {/* Watch Now CTA */}
+                        {/* Download CTA */}
+                        <motion.section variants={fadeUp} custom={1}>
+                            <button
+                                onClick={() => {
+                                    const id = movie.id || movie._id;
+                                    const type = movie.media_type || mediaType || 'movie';
+                                    navigate(`/download/${type}/${id}`);
+                                }}
+                                className="w-full flex items-center gap-4 p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 group"
+                            >
+                                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-brand/20 text-brand group-hover:bg-brand group-hover:text-white transition-all duration-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                                        <polyline strokeLinecap="round" strokeLinejoin="round" points="7 10 12 15 17 10" />
+                                        <line strokeLinecap="round" x1="12" y1="15" x2="12" y2="3" />
+                                    </svg>
+                                </div>
+                                <div className="text-left">
+                                    <span className="text-white font-bold text-base sm:text-lg block">Download</span>
+                                    <span className="text-white/40 text-xs sm:text-sm">Save to watch offline</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white/30 ml-auto group-hover:text-white/60 group-hover:translate-x-1 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </motion.section>
 
                     </div>
 
