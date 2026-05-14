@@ -16,5 +16,8 @@ export const getMediaDetails = (id, type = 'movie') => API.get(`/media/${type}/$
 // Fetch Cast / Credits
 export const getMovieCredits = (type, id) => API.get(`/media/credits/${type}/${id}`);
 
+// Fetch Recommendations (TMDB-powered)
+export const getRecommendations = (type, id) => API.get(`/media/recommendations/${type}/${id}`);
+
 // Admin
 export const createMediaAdmin = (formData) => API.post('/media/admin/create', formData, { headers: { 'Content-Type': 'multipart/form-data' } });

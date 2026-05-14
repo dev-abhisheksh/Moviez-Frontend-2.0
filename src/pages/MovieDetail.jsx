@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getMediaDetails, getMediaTrailer, getMovieCredits } from '../api/media.api';
+import { getMediaDetails, getMediaTrailer, getMovieCredits, getRecommendations } from '../api/media.api';
 import { toggleFavourite, checkFavouriteStatus } from '../api/favourite.api';
 import { addToHistory } from '../api/history.api';
 import TrailerModal from '../components/movies/TrailerModal';
 import VideoPlayer from '../components/movies/VideoPlayer';
 import EmptyState from '../components/common/EmptyState';
 import MovieRow from '../components/movies/MovieRow';
+import MovieCard from '../components/movies/MovieCard';
 import Button from '../components/common/Button';
 
 const FALLBACK_BACKDROP = 'https://via.placeholder.com/1920x1080?text=MovieHub+Content';
@@ -38,6 +39,7 @@ const MovieDetail = () => {
     const [youtubeKey, setYoutubeKey] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
     const [cast, setCast] = useState([]);
+    const [recommendations, setRecommendations] = useState([]);
     const [showPlayer, setShowPlayer] = useState(false);
 
     useEffect(() => {
@@ -80,6 +82,23 @@ const MovieDetail = () => {
         };
 
         if (mediaId && mediaType) fetchCredits();
+    }, [mediaId, mediaType]);
+
+    // Fetch recommendations (TMDB-powered)
+    useEffect(() => {
+        const fetchRecs = async () => {
+            try {
+                const type = mediaType || 'movie';
+                // Only fetch TMDB recommendations for non-admin content
+                if (type === 'admin') return;
+                const { data } = await getRecommendations(type, mediaId);
+                setRecommendations(data.results || []);
+            } catch (err) {
+                console.error('Recommendations fetch error:', err);
+            }
+        };
+
+        if (mediaId && mediaType && mediaType !== 'admin') fetchRecs();
     }, [mediaId, mediaType]);
 
     // Check favourite status
@@ -236,7 +255,7 @@ const MovieDetail = () => {
         genres = movie.genre_ids.map(id => GENRE_MAP[id] || 'Unknown');
     }
 
-    const firstGenre = genres[0] || movie.title || 'action';
+    const isAdminContent = isAdmin || mediaType === 'admin';
 
     return (
         <>
@@ -487,7 +506,22 @@ const MovieDetail = () => {
 
                 {/* ─── Recommendations ─── */}
                 <div className="pb-20 border-t border-white/5 pt-4">
-                    <MovieRow title="You May Also Like" endpoint={`/media/search?q=${encodeURIComponent(firstGenre)}`} dark />
+                    {!isAdminContent && recommendations.length > 0 ? (
+                        <div className="my-15 px-6 sm:px-8 lg:px-16">
+                            <h2 className="text-xl lg:text-2xl font-black mb-4 border-l-4 border-brand pl-3 uppercase tracking-tighter text-white">
+                                You May Also Like
+                            </h2>
+                            <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide snap-x">
+                                {recommendations.map((rec) => (
+                                    <div key={rec.id} className="min-w-[160px] md:min-w-[200px] lg:min-w-[240px] snap-start">
+                                        <MovieCard movie={rec} dark />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <MovieRow title="You May Also Like" endpoint="/media/trending/movie" dark />
+                    )}
                 </div>
             </div>
 
