@@ -6,9 +6,10 @@ import { getMediaDetails } from '../api/media.api';
 const FALLBACK_BACKDROP = 'https://images.placeholders.dev/?width=1920&height=1080&text=MovieHub&bgColor=%231a1a2e';
 
 const SERVER_OPTIONS = [
-    { label: 'Server 1 (VidKing)', id: 'vidking', getUrl: (type, id, s, e) => type === 'tv' ? `https://www.vidking.net/embed/tv/${id}/${s}/${e}?color=e50914` : `https://www.vidking.net/embed/movie/${id}?color=e50914` },
-    { label: 'Server 2 (VidSrc)', id: 'vidsrc', getUrl: (type, id, s, e) => type === 'tv' ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}` : `https://vidsrc.cc/v2/embed/movie/${id}` },
-    { label: 'Server 3 (Embed)', id: 'embed', getUrl: (type, id, s, e) => type === 'tv' ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}` : `https://multiembed.mov/?video_id=${id}&tmdb=1` },
+    { label: 'Server 1', id: 'vidking', getUrl: (type, id, s, e) => type === 'tv' ? `https://www.vidking.net/embed/tv/${id}/${s}/${e}?color=e50914` : `https://www.vidking.net/embed/movie/${id}?color=e50914` },
+    { label: 'Server 2', id: 'vidbinge', getUrl: (type, id, s, e) => type === 'tv' ? `https://vidbinge.dev/embed/tv/${id}/${s}/${e}` : `https://vidbinge.dev/embed/movie/${id}` },
+    { label: 'Server 3', id: 'embed2', getUrl: (type, id, s, e) => type === 'tv' ? `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}` : `https://www.2embed.cc/embed/${id}` },
+    { label: 'Server 4', id: 'multiembed', getUrl: (type, id, s, e) => type === 'tv' ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}` : `https://multiembed.mov/?video_id=${id}&tmdb=1` },
 ];
 
 const fadeUp = {

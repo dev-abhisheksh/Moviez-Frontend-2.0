@@ -41,6 +41,8 @@ const MovieDetail = () => {
     const [cast, setCast] = useState([]);
     const [recommendations, setRecommendations] = useState([]);
     const [showPlayer, setShowPlayer] = useState(false);
+    const [selectedSeason, setSelectedSeason] = useState(1);
+    const [selectedEpisode, setSelectedEpisode] = useState(1);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -263,12 +265,39 @@ const MovieDetail = () => {
             <div className="bg-surfaceDark min-h-screen text-white">
                 {/* ─── VidKing Player (replaces hero when active) ─── */}
                 {showPlayer && (
-                    <div className="w-full bg-black">
+                    <div className="w-full bg-black pt-14">
+                        {/* Season/Episode picker for TV */}
+                        {mediaType === 'tv' && (
+                            <div className="flex items-center gap-4 px-4 sm:px-8 py-3 bg-surfaceDark/90 backdrop-blur-sm border-b border-white/5">
+                                <div className="flex items-center gap-2">
+                                    <label className="text-white/40 text-xs font-semibold uppercase tracking-wider">Season</label>
+                                    <select
+                                        value={selectedSeason}
+                                        onChange={(e) => { setSelectedSeason(Number(e.target.value)); setSelectedEpisode(1); }}
+                                        className="bg-white/10 border border-white/15 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-brand/50"
+                                    >
+                                        {Array.from({ length: movie.number_of_seasons || 5 }, (_, i) => (
+                                            <option key={i + 1} value={i + 1} className="bg-surfaceDark">{i + 1}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <label className="text-white/40 text-xs font-semibold uppercase tracking-wider">Episode</label>
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        value={selectedEpisode}
+                                        onChange={(e) => setSelectedEpisode(Number(e.target.value) || 1)}
+                                        className="bg-white/10 border border-white/15 text-white text-sm rounded-lg px-3 py-1.5 w-20 focus:outline-none focus:border-brand/50"
+                                    />
+                                </div>
+                            </div>
+                        )}
                         <VideoPlayer
                             tmdbId={movie.id || movie._id}
                             type={mediaType || 'movie'}
-                            season={1}
-                            episode={1}
+                            season={selectedSeason}
+                            episode={selectedEpisode}
                             onEnded={handlePlayerEnded}
                             onClose={() => setShowPlayer(false)}
                         />
