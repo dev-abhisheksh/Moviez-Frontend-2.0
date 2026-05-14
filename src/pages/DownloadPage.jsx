@@ -5,11 +5,10 @@ import { getMediaDetails } from '../api/media.api';
 
 const FALLBACK_BACKDROP = 'https://images.placeholders.dev/?width=1920&height=1080&text=MovieHub&bgColor=%231a1a2e';
 
-const QUALITY_OPTIONS = [
-    { label: '4K Ultra HD', quality: '2160p', size: '~8-15 GB', icon: '🎬' },
-    { label: 'Full HD', quality: '1080p', size: '~2-4 GB', icon: '📀' },
-    { label: 'HD', quality: '720p', size: '~1-2 GB', icon: '💿' },
-    { label: 'SD', quality: '480p', size: '~500 MB', icon: '📱' },
+const SERVER_OPTIONS = [
+    { label: 'Server 1 (VidKing)', id: 'vidking', getUrl: (type, id, s, e) => type === 'tv' ? `https://www.vidking.net/embed/tv/${id}/${s}/${e}?color=e50914` : `https://www.vidking.net/embed/movie/${id}?color=e50914` },
+    { label: 'Server 2 (VidSrc)', id: 'vidsrc', getUrl: (type, id, s, e) => type === 'tv' ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}` : `https://vidsrc.cc/v2/embed/movie/${id}` },
+    { label: 'Server 3 (Embed)', id: 'embed', getUrl: (type, id, s, e) => type === 'tv' ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}` : `https://multiembed.mov/?video_id=${id}&tmdb=1` },
 ];
 
 const fadeUp = {
@@ -26,13 +25,17 @@ const DownloadPage = () => {
     const navigate = useNavigate();
     const [movie, setMovie] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [downloading, setDownloading] = useState(null);
+    const [activeServer, setActiveServer] = useState('vidking');
+    const [iframeLoaded, setIframeLoaded] = useState(false);
+    const [season, setSeason] = useState(1);
+    const [episode, setEpisode] = useState(1);
 
     useEffect(() => {
         const fetchDetails = async () => {
             try {
                 const { data } = await getMediaDetails(mediaId, mediaType);
-                setMovie(data);
+                const media = data.media || data;
+                setMovie(media);
             } catch (err) {
                 console.error('Download page fetch error:', err);
             } finally {
@@ -41,6 +44,11 @@ const DownloadPage = () => {
         };
         fetchDetails();
     }, [mediaId, mediaType]);
+
+    // Reset iframe loaded state when server changes
+    useEffect(() => {
+        setIframeLoaded(false);
+    }, [activeServer, season, episode]);
 
     const getBackdropUrl = () => {
         if (!movie?.backdrop_path) return FALLBACK_BACKDROP;
@@ -54,29 +62,8 @@ const DownloadPage = () => {
         return `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
     };
 
-    const handleDownload = (quality) => {
-        setDownloading(quality);
-
-        // Build the download embed URL
-        const id = movie?.id || movie?._id || mediaId;
-        const type = mediaType === 'tv' ? 'tv' : 'movie';
-
-        // Open VidSrc download page in same window using an anchor
-        const downloadUrl = type === 'tv'
-            ? `https://vidsrc.xyz/embed/tv/${id}`
-            : `https://vidsrc.xyz/embed/movie/${id}`;
-
-        // Create a temporary link to bypass popup blockers
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        setTimeout(() => setDownloading(null), 2000);
-    };
+    const currentServer = SERVER_OPTIONS.find(s => s.id === activeServer) || SERVER_OPTIONS[0];
+    const embedUrl = movie ? currentServer.getUrl(mediaType === 'tv' ? 'tv' : 'movie', movie.id || movie._id || mediaId, season, episode) : '';
 
     if (loading) {
         return (
@@ -106,17 +93,18 @@ const DownloadPage = () => {
 
     const title = movie.title || movie.name || 'Unknown Title';
     const year = (movie.release_date || movie.first_air_date || '').split('-')[0];
+    const totalSeasons = movie.number_of_seasons || 1;
 
     return (
         <div className="bg-surfaceDark min-h-screen">
             {/* Background Backdrop */}
             <div className="fixed inset-0 z-0">
-                <img src={getBackdropUrl()} alt="" className="w-full h-full object-cover opacity-15 blur-sm" />
+                <img src={getBackdropUrl()} alt="" className="w-full h-full object-cover opacity-10 blur-sm" />
                 <div className="absolute inset-0 bg-gradient-to-b from-surfaceDark/80 via-surfaceDark/95 to-surfaceDark" />
             </div>
 
             {/* Content */}
-            <div className="relative z-10 pt-24 sm:pt-28 pb-20 px-6 sm:px-10 lg:px-16">
+            <div className="relative z-10 pt-24 sm:pt-28 pb-20 px-4 sm:px-10 lg:px-16">
                 {/* Back button */}
                 <button
                     onClick={() => navigate(-1)}
@@ -128,28 +116,25 @@ const DownloadPage = () => {
                     Back
                 </button>
 
-                <div className="max-w-4xl mx-auto">
-                    {/* Movie Info Card */}
+                <div className="max-w-5xl mx-auto">
+                    {/* Movie Info */}
                     <motion.div
-                        className="flex flex-col sm:flex-row gap-6 mb-10"
+                        className="flex flex-col sm:flex-row gap-5 mb-8"
                         initial="hidden"
                         animate="visible"
                     >
-                        {/* Poster */}
-                        <motion.div variants={fadeUp} custom={0} className="flex-shrink-0">
-                            <img
-                                src={getPosterUrl()}
-                                alt={title}
-                                className="w-36 sm:w-44 rounded-2xl shadow-2xl shadow-black/50 border border-white/10"
-                            />
-                        </motion.div>
-
-                        {/* Info */}
+                        <motion.img
+                            src={getPosterUrl()}
+                            alt={title}
+                            className="w-28 sm:w-36 rounded-2xl shadow-2xl shadow-black/50 border border-white/10"
+                            variants={fadeUp}
+                            custom={0}
+                        />
                         <motion.div variants={fadeUp} custom={1} className="flex flex-col justify-center">
-                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight mb-2">
+                            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-1.5">
                                 {title}
                             </h1>
-                            <div className="flex flex-wrap items-center gap-3 text-sm text-white/50 mb-3">
+                            <div className="flex flex-wrap items-center gap-3 text-sm text-white/50 mb-2">
                                 {year && <span>{year}</span>}
                                 {movie.runtime > 0 && (
                                     <>
@@ -166,79 +151,121 @@ const DownloadPage = () => {
                                 <span className="w-1 h-1 rounded-full bg-white/30" />
                                 <span className="capitalize">{mediaType}</span>
                             </div>
-                            <p className="text-white/40 text-sm sm:text-base line-clamp-3 max-w-lg leading-relaxed">
-                                {movie.overview || 'No description available.'}
-                            </p>
+                            <p className="text-white/40 text-sm line-clamp-2 max-w-lg">{movie.overview || ''}</p>
                         </motion.div>
                     </motion.div>
 
-                    {/* Download Options */}
-                    <motion.div initial="hidden" animate="visible">
-                        <motion.h2
-                            className="text-xl font-bold text-white mb-5 flex items-center gap-2"
-                            variants={fadeUp}
-                            custom={2}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    {/* Server Selector & Episode Picker */}
+                    <motion.div
+                        className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-5"
+                        initial="hidden"
+                        animate="visible"
+                        variants={fadeUp}
+                        custom={2}
+                    >
+                        {/* Server Tabs */}
+                        <div className="flex flex-wrap gap-2">
+                            {SERVER_OPTIONS.map((server) => (
+                                <button
+                                    key={server.id}
+                                    onClick={() => setActiveServer(server.id)}
+                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                                        activeServer === server.id
+                                            ? 'bg-brand text-white shadow-lg shadow-brand/30'
+                                            : 'bg-white/5 text-white/50 border border-white/10 hover:bg-white/10 hover:text-white/80'
+                                    }`}
+                                >
+                                    {server.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Season/Episode picker for TV */}
+                        {mediaType === 'tv' && (
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2">
+                                    <label className="text-white/40 text-xs font-semibold uppercase tracking-wider">S</label>
+                                    <select
+                                        value={season}
+                                        onChange={(e) => { setSeason(Number(e.target.value)); setEpisode(1); }}
+                                        className="bg-white/10 border border-white/15 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-brand/50"
+                                    >
+                                        {Array.from({ length: totalSeasons }, (_, i) => (
+                                            <option key={i + 1} value={i + 1} className="bg-surfaceDark">{i + 1}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <label className="text-white/40 text-xs font-semibold uppercase tracking-wider">E</label>
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        value={episode}
+                                        onChange={(e) => setEpisode(Number(e.target.value) || 1)}
+                                        className="bg-white/10 border border-white/15 text-white text-sm rounded-lg px-3 py-2 w-20 focus:outline-none focus:border-brand/50"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </motion.div>
+
+                    {/* Embedded Player */}
+                    <motion.div
+                        className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40"
+                        initial="hidden"
+                        animate="visible"
+                        variants={fadeUp}
+                        custom={3}
+                    >
+                        {/* Loading state */}
+                        {!iframeLoaded && (
+                            <div className="absolute inset-0 z-20 flex items-center justify-center bg-surfaceDark">
+                                <div className="flex flex-col items-center gap-4">
+                                    <div className="w-12 h-12 border-4 border-brand/30 border-t-brand rounded-full animate-spin" />
+                                    <span className="text-white/40 text-sm">Loading player...</span>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="aspect-video w-full bg-black">
+                            <iframe
+                                key={`${activeServer}-${season}-${episode}`}
+                                src={embedUrl}
+                                title="Download Player"
+                                className="w-full h-full"
+                                frameBorder="0"
+                                allowFullScreen
+                                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                                onLoad={() => setIframeLoaded(true)}
+                            />
+                        </div>
+                    </motion.div>
+
+                    {/* Instructions */}
+                    <motion.div
+                        className="mt-6 p-4 sm:p-5 rounded-xl bg-white/5 border border-white/10"
+                        initial="hidden"
+                        animate="visible"
+                        variants={fadeUp}
+                        custom={4}
+                    >
+                        <h3 className="text-white font-bold text-sm mb-3 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                                 <polyline strokeLinecap="round" strokeLinejoin="round" points="7 10 12 15 17 10" />
                                 <line strokeLinecap="round" x1="12" y1="15" x2="12" y2="3" />
                             </svg>
-                            Download Options
-                        </motion.h2>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            {QUALITY_OPTIONS.map((opt, i) => (
-                                <motion.button
-                                    key={opt.quality}
-                                    variants={fadeUp}
-                                    custom={i + 3}
-                                    onClick={() => handleDownload(opt.quality)}
-                                    disabled={downloading === opt.quality}
-                                    className="flex items-center gap-4 p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-brand/30 transition-all duration-300 group disabled:opacity-60 text-left"
-                                >
-                                    <span className="text-2xl">{opt.icon}</span>
-                                    <div className="flex-1">
-                                        <span className="text-white font-bold text-sm sm:text-base block">
-                                            {opt.label}
-                                            <span className="ml-2 text-white/30 font-normal text-xs">({opt.quality})</span>
-                                        </span>
-                                        <span className="text-white/30 text-xs">{opt.size}</span>
-                                    </div>
-                                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/10 text-brand group-hover:bg-brand group-hover:text-white transition-all duration-300">
-                                        {downloading === opt.quality ? (
-                                            <svg className="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                            </svg>
-                                        ) : (
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                                                <polyline strokeLinecap="round" strokeLinejoin="round" points="7 10 12 15 17 10" />
-                                                <line strokeLinecap="round" x1="12" y1="15" x2="12" y2="3" />
-                                            </svg>
-                                        )}
-                                    </div>
-                                </motion.button>
-                            ))}
-                        </div>
-
-                        {/* Info Note */}
-                        <motion.div
-                            variants={fadeUp}
-                            custom={7}
-                            className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10 flex items-start gap-3"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white/30 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10" />
-                                <line x1="12" y1="16" x2="12" y2="12" />
-                                <line x1="12" y1="8" x2="12.01" y2="8" />
-                            </svg>
-                            <p className="text-white/30 text-xs sm:text-sm leading-relaxed">
-                                Downloads are provided through third-party sources. Actual quality and availability may vary.
-                                For the best experience, use the in-app player to stream directly.
-                            </p>
-                        </motion.div>
+                            How to Download
+                        </h3>
+                        <ol className="text-white/40 text-xs sm:text-sm space-y-2 list-decimal list-inside">
+                            <li>Select a server above. If one doesn't work, try another.</li>
+                            <li>Wait for the video to load in the player.</li>
+                            <li>Use the player's built-in <strong className="text-white/60">download button</strong> (if available).</li>
+                            <li>Or play the video, then <strong className="text-white/60">right-click → Save video as...</strong> to download.</li>
+                            {mediaType === 'tv' && (
+                                <li>For TV shows, select the <strong className="text-white/60">Season</strong> and <strong className="text-white/60">Episode</strong> above.</li>
+                            )}
+                        </ol>
                     </motion.div>
                 </div>
             </div>
