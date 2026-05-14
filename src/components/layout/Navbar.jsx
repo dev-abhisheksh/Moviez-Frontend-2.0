@@ -34,7 +34,8 @@ const Navbar = () => {
     ];
 
     return (
-        <nav className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-8 lg:px-16 py-3 transition-all duration-300 ${
+        <>
+            <nav className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-8 lg:px-16 py-3 transition-all duration-300 ${
             scrolled
                 ? 'bg-black/40 backdrop-blur-xl'
                 : 'bg-gradient-to-b from-black/60 to-transparent'
@@ -104,8 +105,9 @@ const Navbar = () => {
                     />
                 </button>
             </div>
+        </nav>
 
-            {/* ===== Mobile Drawer ===== */}
+        {/* ===== Mobile Drawer ===== */}
 
             {/* Backdrop */}
             <div
@@ -183,7 +185,7 @@ const Navbar = () => {
                     )}
                 </div>
             </div>
-        </nav>
+        </>
     );
 };
 
