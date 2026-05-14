@@ -44,6 +44,7 @@ const MovieDetail = () => {
     const [selectedSeason, setSelectedSeason] = useState(1);
     const [selectedEpisode, setSelectedEpisode] = useState(1);
     const [activeServer, setActiveServer] = useState('vidking');
+    const [clickShield, setClickShield] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -363,6 +364,17 @@ const MovieDetail = () => {
 
                             {/* ── Video Frame ── */}
                             <div className="aspect-video w-full bg-black relative">
+                                {/* Click shield: absorbs the first click (ad redirect) then disappears */}
+                                {clickShield && (
+                                    <div
+                                        className="absolute inset-0 z-10 cursor-pointer"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setClickShield(false);
+                                        }}
+                                    />
+                                )}
                                 <iframe
                                     key={`${activeServer}-${selectedSeason}-${selectedEpisode}`}
                                     src={currentUrl}
@@ -371,6 +383,7 @@ const MovieDetail = () => {
                                     frameBorder="0"
                                     allowFullScreen
                                     allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                                    onLoad={() => setClickShield(true)}
                                 />
                             </div>
                         </div>
