@@ -20,9 +20,9 @@ const CATEGORY_CONFIG = {
         icon: '💥',
     },
     'anime': {
-        title: 'Latest Anime',
-        subtitle: 'Currently running & popular anime series',
-        endpoint: '/media/search?q=anime',
+        title: 'Currently Airing Anime',
+        subtitle: 'Ongoing Japanese anime series airing right now',
+        endpoint: '/media/anime/airing',
         defaultType: 'tv',
         icon: '🎌',
     },

@@ -21,9 +21,8 @@ const Home = () => {
                 />
 
                 <MovieCarousel
-                    title="Latest Anime"
-                    endpoint="/media/search?q=anime"
-                    minRating={7.5}
+                    title="Currently Airing Anime"
+                    endpoint="/media/anime/airing"
                     categorySlug="anime"
                 />
 

@@ -21,3 +21,6 @@ export const getRecommendations = (type, id) => API.get(`/media/recommendations/
 
 // Admin
 export const createMediaAdmin = (formData) => API.post('/media/admin/create', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+
+// Airing Anime
+export const getAiringAnime = (page = 1) => API.get(`/media/anime/airing?page=${page}`);
