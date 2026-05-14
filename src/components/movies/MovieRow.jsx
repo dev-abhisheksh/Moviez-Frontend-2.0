@@ -3,7 +3,7 @@ import { useInView } from 'react-intersection-observer';
 import MovieCard from './MovieCard';
 import { API } from '../../api/media.api';
 
-const MovieRow = ({ title, endpoint, minRating = 0 }) => {
+const MovieRow = ({ title, endpoint, minRating = 0, dark = false }) => {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(false);
     const [fetched, setFetched] = useState(false);
@@ -45,19 +45,22 @@ const MovieRow = ({ title, endpoint, minRating = 0 }) => {
         fetchMovies();
     }, [inView, fetched, endpoint, title, minRating]);
 
+    const skeletonBg = dark ? 'bg-white/10 skeleton-shimmer' : 'bg-gray-200 animate-pulse';
+    const skeletonBgLight = dark ? 'bg-white/6 skeleton-shimmer' : 'bg-gray-100 animate-pulse';
+
     return (
-        <div ref={ref} className="my-15 px-8 lg:px-16">
-            <h2 className="text-xl lg:text-2xl font-black mb-4 text-textMain border-l-4 border-brand pl-3 uppercase tracking-tighter">
+        <div ref={ref} className="my-15 px-6 sm:px-8 lg:px-16">
+            <h2 className={`text-xl lg:text-2xl font-black mb-4 border-l-4 border-brand pl-3 uppercase tracking-tighter ${dark ? 'text-white' : 'text-textMain'}`}>
                 {title}
             </h2>
 
             {loading && (
                 <div className="flex gap-4 overflow-hidden">
                     {[1, 2, 3, 4, 5, 6].map((i) => (
-                        <div key={i} className="min-w-[180px] space-y-3 animate-pulse">
-                            <div className="aspect-[2/3] bg-gray-200 rounded-lg" />
-                            <div className="h-4 bg-gray-200 rounded w-3/4" />
-                            <div className="h-3 bg-gray-100 rounded w-1/2" />
+                        <div key={i} className="min-w-[180px] space-y-3">
+                            <div className={`aspect-[2/3] rounded-lg ${skeletonBg}`} />
+                            <div className={`h-4 rounded w-3/4 ${skeletonBg}`} />
+                            <div className={`h-3 rounded w-1/2 ${skeletonBgLight}`} />
                         </div>
                     ))}
                 </div>
@@ -69,7 +72,7 @@ const MovieRow = ({ title, endpoint, minRating = 0 }) => {
                 <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide snap-x">
                     {movies.map((movie) => (
                         <div key={movie.id || movie._id} className="min-w-[160px] md:min-w-[200px] lg:min-w-[240px] snap-start">
-                            <MovieCard movie={movie} />
+                            <MovieCard movie={movie} dark={dark} />
                         </div>
                     ))}
                 </div>

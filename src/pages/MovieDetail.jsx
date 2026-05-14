@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { getMediaDetails, getMediaTrailer, getMovieCredits } from '../api/media.api';
 import { toggleFavourite, checkFavouriteStatus } from '../api/favourite.api';
 import { addToHistory } from '../api/history.api';
@@ -12,6 +13,21 @@ import Button from '../components/common/Button';
 const FALLBACK_BACKDROP = 'https://via.placeholder.com/1920x1080?text=MovieHub+Content';
 const ERROR_BACKDROP = 'https://images.placeholders.dev/?width=1920&height=1080&text=Content+Unavailable&bgColor=%23111';
 const AVATAR_FALLBACK = 'https://images.placeholders.dev/?width=185&height=278&text=No+Photo&bgColor=%23333';
+
+/* ── Subtle animation presets ── */
+const fadeUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i = 0) => ({
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, delay: i * 0.08, ease: [0.25, 0.46, 0.45, 0.94] },
+    }),
+};
+
+const fadeIn = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.6, ease: 'easeOut' } },
+};
 
 const MovieDetail = () => {
     const { mediaId, mediaType } = useParams();
@@ -142,26 +158,45 @@ const MovieDetail = () => {
         }
     };
 
+    /* ── Loading State ── */
     if (loading) return (
-        <div className="bg-background min-h-screen">
-            <div className="w-full h-[60vh] lg:h-[80vh] bg-gray-900 animate-pulse" />
-            <div className="px-8 lg:px-16 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="bg-surfaceDark min-h-screen">
+            {/* Hero skeleton */}
+            <div className="relative w-full h-[55vh] lg:h-[80vh] bg-gradient-to-b from-gray-800 to-surfaceDark overflow-hidden">
+                <div className="absolute inset-0 skeleton-shimmer" />
+                <div className="absolute bottom-12 left-0 px-6 sm:px-10 lg:px-16 w-full max-w-3xl space-y-4">
+                    <div className="h-4 w-32 rounded-full bg-white/10 skeleton-shimmer" />
+                    <div className="h-10 lg:h-14 w-3/4 rounded-lg bg-white/10 skeleton-shimmer" />
+                    <div className="h-5 w-1/2 rounded-md bg-white/8 skeleton-shimmer" />
+                    <div className="flex gap-3 pt-4">
+                        <div className="h-12 w-32 rounded-xl bg-white/10 skeleton-shimmer" />
+                        <div className="h-12 w-32 rounded-xl bg-white/8 skeleton-shimmer" />
+                        <div className="h-12 w-12 rounded-full bg-white/8 skeleton-shimmer" />
+                    </div>
+                </div>
+            </div>
+            {/* Content skeleton */}
+            <div className="px-6 sm:px-10 lg:px-16 py-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
                 <div className="lg:col-span-2 space-y-4">
-                    <div className="h-10 bg-gray-200 rounded-lg w-1/3 animate-pulse mb-6" />
-                    <div className="h-4 bg-gray-200 rounded w-full animate-pulse" />
-                    <div className="h-4 bg-gray-200 rounded w-5/6 animate-pulse" />
-                    <div className="h-4 bg-gray-200 rounded w-4/5 animate-pulse" />
+                    <div className="h-7 bg-white/8 rounded-lg w-40 skeleton-shimmer" />
+                    <div className="h-4 bg-white/6 rounded w-full skeleton-shimmer" />
+                    <div className="h-4 bg-white/6 rounded w-5/6 skeleton-shimmer" />
+                    <div className="h-4 bg-white/6 rounded w-4/5 skeleton-shimmer" />
+                </div>
+                <div className="space-y-4">
+                    <div className="h-40 bg-white/6 rounded-2xl skeleton-shimmer" />
                 </div>
             </div>
         </div>
     );
 
+    /* ── Error State ── */
     if (error || !movie) return (
-        <div className="bg-background min-h-screen flex flex-col pt-20">
+        <div className="bg-surfaceDark min-h-screen flex flex-col pt-20">
             <div className="relative flex-1 flex items-center justify-center">
                 <div className="absolute inset-0 z-0">
-                    <img src={ERROR_BACKDROP} alt="error" className="w-full h-full object-cover opacity-20" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+                    <img src={ERROR_BACKDROP} alt="error" className="w-full h-full object-cover opacity-10" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-surfaceDark via-surfaceDark/80 to-transparent" />
                 </div>
                 <div className="relative z-10 w-full">
                     <EmptyState
@@ -173,8 +208,8 @@ const MovieDetail = () => {
                     />
                 </div>
             </div>
-            <div className="relative z-10 pb-20 mt-10 border-t border-gray-100/10">
-                <MovieRow title="Top Picks For You" endpoint="/media/trending/movie" />
+            <div className="relative z-10 pb-20 mt-10 border-t border-white/5">
+                <MovieRow title="Top Picks For You" endpoint="/media/trending/movie" dark />
             </div>
         </div>
     );
@@ -205,7 +240,7 @@ const MovieDetail = () => {
 
     return (
         <>
-            <div className="bg-background min-h-screen">
+            <div className="bg-surfaceDark min-h-screen text-white">
                 {/* ─── VidKing Player (replaces hero when active) ─── */}
                 {showPlayer && (
                     <div className="w-full bg-black">
@@ -220,142 +255,239 @@ const MovieDetail = () => {
                     </div>
                 )}
 
-                {/* ─── Backdrop & Main Info (hidden when player is active) ─── */}
+                {/* ─── Cinematic Hero Section ─── */}
                 {!showPlayer && (
-                    <div className="relative h-[60vh] lg:h-[80vh] w-full bg-black">
+                    <motion.div
+                        className="relative h-[55vh] sm:h-[60vh] lg:h-[80vh] w-full bg-black overflow-hidden"
+                        initial="hidden"
+                        animate="visible"
+                        variants={fadeIn}
+                    >
+                        {/* Backdrop image */}
                         <img
                             src={getBackdropUrl()}
-                            className="w-full h-full object-cover opacity-60"
+                            className="absolute inset-0 w-full h-full object-cover scale-105"
                             alt="backdrop"
                             onError={handleImgError}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+                        {/* Multi-layer gradient overlays for cinematic depth */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-surfaceDark via-surfaceDark/40 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-surfaceDark/80 via-transparent to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-surfaceDark to-transparent" />
 
-                        <div className="absolute bottom-10 left-0 px-8 lg:px-16 w-full max-w-4xl space-y-4">
+                        {/* Hero content */}
+                        <motion.div
+                            className="absolute bottom-10 sm:bottom-14 lg:bottom-16 left-0 px-6 sm:px-10 lg:px-16 w-full max-w-4xl space-y-3"
+                            initial="hidden"
+                            animate="visible"
+                        >
+                            {/* Genre chips */}
                             {genres.length > 0 && (
-                                <div className="flex items-center gap-3 text-tmdbBlue text-white font-bold text-sm uppercase tracking-widest">
-                                    {genres.join(' • ')}
-                                </div>
-                            )}
-                            <h1 className="text-4xl lg:text-7xl text-white font-black text-textMain tracking-tighter">
-                                {movie.title || movie.name}
-                            </h1>
-                            {movie.tagline && (
-                                <p className="italic text-white text-lg lg:text-xl font-medium">"{movie.tagline}"</p>
+                                <motion.div
+                                    className="flex flex-wrap items-center gap-2"
+                                    variants={fadeUp}
+                                    custom={0}
+                                >
+                                    {genres.map((g, i) => (
+                                        <span
+                                            key={i}
+                                            className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wider rounded-full bg-white/10 backdrop-blur-sm text-white/90 border border-white/10"
+                                        >
+                                            {g}
+                                        </span>
+                                    ))}
+                                </motion.div>
                             )}
 
-                            <div className="flex flex-wrap items-center gap-4 mt-6">
-                                {/* ▶ Play — opens the VidKing player */}
+                            {/* Title */}
+                            <motion.h1
+                                className="text-3xl sm:text-4xl lg:text-6xl xl:text-7xl font-black tracking-tight leading-[1.05] text-white drop-shadow-lg"
+                                variants={fadeUp}
+                                custom={1}
+                            >
+                                {movie.title || movie.name}
+                            </motion.h1>
+
+                            {/* Tagline */}
+                            {movie.tagline && (
+                                <motion.p
+                                    className="italic text-white/70 text-base sm:text-lg lg:text-xl font-light"
+                                    variants={fadeUp}
+                                    custom={2}
+                                >
+                                    "{movie.tagline}"
+                                </motion.p>
+                            )}
+
+                            {/* Action buttons */}
+                            <motion.div
+                                className="flex flex-wrap items-center gap-3 pt-3"
+                                variants={fadeUp}
+                                custom={3}
+                            >
+                                {/* ▶ Play */}
                                 <Button
                                     onClick={() => setShowPlayer(true)}
-                                    className="px-10 py-4 shadow-xl bg-brand text-white hover:bg-red-700 transition"
+                                    className="px-8 sm:px-10 py-3.5 shadow-lg shadow-brand/30 bg-brand text-white font-bold rounded-xl hover:bg-red-600 hover:shadow-brand/50 hover:scale-[1.03] active:scale-[0.97] transition-all duration-200"
                                 >
-                                    ▶ Play
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                    Play
                                 </Button>
 
-                                {/* 🎬 Trailer — opens the existing YouTube modal */}
+                                {/* 🎬 Trailer */}
                                 <Button
                                     onClick={handlePlayTrailer}
-                                    className="px-8 py-4 shadow-xl bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 transition"
+                                    className="px-6 sm:px-8 py-3.5 shadow-lg bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-xl hover:bg-white/20 hover:border-white/30 hover:scale-[1.03] active:scale-[0.97] transition-all duration-200"
                                 >
-                                    🎬 Trailer
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
+                                        <line x1="7" y1="2" x2="7" y2="22" />
+                                        <line x1="17" y1="2" x2="17" y2="22" />
+                                        <line x1="2" y1="12" x2="22" y2="12" />
+                                        <line x1="2" y1="7" x2="7" y2="7" />
+                                        <line x1="2" y1="17" x2="7" y2="17" />
+                                        <line x1="17" y1="7" x2="22" y2="7" />
+                                        <line x1="17" y1="17" x2="22" y2="17" />
+                                    </svg>
+                                    Trailer
                                 </Button>
 
+                                {/* ❤ Favourite */}
                                 <button
                                     onClick={handleToggleFavourite}
-                                    className="flex items-center gap-2 bg-white border-2 border-gray-200 p-3 rounded-full hover:bg-gray-50 transition group"
+                                    className={`flex items-center justify-center w-12 h-12 rounded-full backdrop-blur-md border transition-all duration-300 hover:scale-110 active:scale-95 ${isLiked
+                                            ? 'bg-brand/20 border-brand/40 shadow-lg shadow-brand/20'
+                                            : 'bg-white/10 border-white/20 hover:bg-white/20'
+                                        }`}
                                 >
-                                    <span className={`text-2xl group-hover:scale-125 transition-transform ${isLiked ? 'text-red-500' : 'text-gray-400'}`}>
+                                    <span className={`text-xl ${isLiked ? 'text-brand' : 'text-white/70'}`}>
                                         ❤
                                     </span>
                                 </button>
+
+                                {/* Rating badge */}
                                 {movie.vote_average > 0 && (
-                                    <div className="flex flex-col border-l-2 border-gray-200 pl-6">
-                                        <span className="text-sm text-white font-bold uppercase">Rating</span>
-                                        <span className="text-xl font-black text-white">★ {movie.vote_average?.toFixed(1)}</span>
+                                    <div className="flex items-center gap-2 ml-2 pl-4 border-l border-white/15">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-white/50 font-semibold uppercase tracking-widest">Rating</span>
+                                            <span className="text-lg font-bold text-gold flex items-center gap-1">
+                                                ★ {movie.vote_average?.toFixed(1)}
+                                            </span>
+                                        </div>
                                     </div>
                                 )}
-                            </div>
-                        </div>
-                    </div>
+                            </motion.div>
+                        </motion.div>
+                    </motion.div>
                 )}
 
-                {/* Detailed Info */}
-                <div className="px-8 lg:px-16 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+                {/* ─── Content Section ─── */}
+                <motion.div
+                    className="px-6 sm:px-10 lg:px-16 py-10 lg:py-14 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12"
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.1 }}
+                >
+                    {/* Main Content */}
                     <div className="lg:col-span-2 space-y-8">
-                        <section>
-                            <h2 className="text-2xl font-black text-textMain mb-4">Storyline</h2>
-                            <p className="text-gray-600 leading-relaxed text-lg">
+                        {/* Storyline */}
+                        <motion.section variants={fadeUp} custom={0}>
+                            <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 flex items-center gap-2">
+                                <span className="w-1 h-6 bg-brand rounded-full inline-block" />
+                                Storyline
+                            </h2>
+                            <p className="text-white/60 leading-relaxed text-base sm:text-lg">
                                 {movie.overview || 'No description available for this title.'}
                             </p>
-                        </section>
+                        </motion.section>
 
                         {/* Watch Now CTA */}
-                        {!showPlayer && (
-                            <button
-                                onClick={() => setShowPlayer(true)}
-                                className="flex items-center gap-3 w-full sm:w-auto px-10 py-4 bg-brand text-white font-bold text-lg rounded-xl shadow-lg hover:bg-red-700 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M8 5v14l11-7z" />
-                                </svg>
-                                Watch Now
-                            </button>
-                        )}
+
                     </div>
 
-                    {/* Sidebar Info */}
-                    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-fit space-y-6">
+                    {/* ─── Sidebar Info ─── */}
+                    <motion.div
+                        className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-white/10 h-fit space-y-5"
+                        variants={fadeUp}
+                        custom={2}
+                    >
                         {movie.release_date && (
                             <div>
-                                <span className="block text-xs font-bold text-gray-400 uppercase tracking-widest">Release Date</span>
-                                <span className="text-textMain font-bold">{movie.release_date}</span>
+                                <span className="block text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-1">Release Date</span>
+                                <span className="text-white/90 font-semibold">{movie.release_date}</span>
                             </div>
                         )}
                         {movie.runtime > 0 && (
                             <div>
-                                <span className="block text-xs font-bold text-gray-400 uppercase tracking-widest">Runtime</span>
-                                <span className="text-textMain font-bold">{movie.runtime} minutes</span>
+                                <span className="block text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-1">Runtime</span>
+                                <span className="text-white/90 font-semibold">{movie.runtime} min</span>
                             </div>
                         )}
                         {movie.status && (
                             <div>
-                                <span className="block text-xs font-bold text-gray-400 uppercase tracking-widest">Status</span>
-                                <span className="text-textMain font-bold">{movie.status}</span>
+                                <span className="block text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-1">Status</span>
+                                <span className="text-white/90 font-semibold">{movie.status}</span>
                             </div>
                         )}
-                    </div>
-                </div>
+                        {movie.vote_average > 0 && (
+                            <div>
+                                <span className="block text-[11px] font-semibold text-white/40 uppercase tracking-widest mb-1">User Score</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-gold text-lg font-bold">★ {movie.vote_average?.toFixed(1)}</span>
+                                    <span className="text-white/40 text-sm">/ 10</span>
+                                </div>
+                            </div>
+                        )}
+                    </motion.div>
+                </motion.div>
 
-                {/* Cast Gallery — full width */}
+                {/* ─── Cast Gallery ─── */}
                 {cast.length > 0 && (
-                    <section className="px-8 lg:px-16 mt-1">
-                        <h2 className="text-2xl font-bold text-textMain mb-6">Cast</h2>
-                        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+                    <motion.section
+                        className="px-6 sm:px-10 lg:px-16 pb-8"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, amount: 0.1 }}
+                        variants={fadeUp}
+                        custom={0}
+                    >
+                        <h2 className="text-xl sm:text-2xl font-bold text-white mb-5 flex items-center gap-2">
+                            <span className="w-1 h-6 bg-brand rounded-full inline-block" />
+                            Top Cast
+                        </h2>
+                        <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                             {cast.map((actor) => (
-                                <div key={actor.id} className="flex-shrink-0 w-32 min-w-[120px] text-center">
-                                    <img
-                                        src={actor.profile_path
-                                            ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
-                                            : AVATAR_FALLBACK
-                                        }
-                                        alt={actor.name}
-                                        className="w-32 h-44 object-cover rounded-xl shadow-md bg-gray-200 mx-auto"
-                                        onError={(e) => {
-                                            if (e.target.src !== AVATAR_FALLBACK) e.target.src = AVATAR_FALLBACK;
-                                        }}
-                                    />
-                                    <p className="text-sm font-bold text-gray-900 mt-2 truncate">{actor.name}</p>
-                                    <p className="text-xs text-gray-400 truncate">{actor.character}</p>
+                                <div
+                                    key={actor.id}
+                                    className="flex-shrink-0 w-[120px] sm:w-[130px] group text-center"
+                                >
+                                    <div className="relative overflow-hidden rounded-xl">
+                                        <img
+                                            src={actor.profile_path
+                                                ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
+                                                : AVATAR_FALLBACK
+                                            }
+                                            alt={actor.name}
+                                            className="w-full aspect-[2/3] object-cover bg-white/5 group-hover:scale-105 transition-transform duration-300"
+                                            onError={(e) => {
+                                                if (e.target.src !== AVATAR_FALLBACK) e.target.src = AVATAR_FALLBACK;
+                                            }}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    </div>
+                                    <p className="text-sm font-semibold text-white/90 mt-2 truncate">{actor.name}</p>
+                                    <p className="text-xs text-white/40 truncate">{actor.character}</p>
                                 </div>
                             ))}
                         </div>
-                    </section>
+                    </motion.section>
                 )}
 
-                {/* Recommendations */}
-                <div className="pb-20">
-                    <MovieRow title="You May Also Like" endpoint={`/media/search?q=${encodeURIComponent(firstGenre)}`} />
+                {/* ─── Recommendations ─── */}
+                <div className="pb-20 border-t border-white/5 pt-4">
+                    <MovieRow title="You May Also Like" endpoint={`/media/search?q=${encodeURIComponent(firstGenre)}`} dark />
                 </div>
             </div>
 

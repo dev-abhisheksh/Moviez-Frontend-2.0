@@ -9,6 +9,18 @@ export default {
                 surface: '#FFFFFF',
                 background: '#F8F9FA',
                 textMain: '#141414',
+                surfaceDark: '#1a1a2e',
+                cardDark: '#16213e',
+                gold: '#f5c518',
+            },
+            keyframes: {
+                shimmer: {
+                    '0%': { backgroundPosition: '-200% 0' },
+                    '100%': { backgroundPosition: '200% 0' },
+                },
+            },
+            animation: {
+                shimmer: 'shimmer 1.5s ease-in-out infinite',
             },
         },
     },

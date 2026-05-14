@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand: #E50914;
+  --color-tmdbBlue: #01B4E4;
+  --color-surface: #FFFFFF;
+  --color-background: #F8F9FA;
+  --color-textMain: #141414;
+  --color-surfaceDark: #1a1a2e;
+  --color-cardDark: #16213e;
+  --color-gold: #f5c518;
+
+  --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
@@ -7,6 +34,17 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 25%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.04) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
   }
 }
 

@@ -5,7 +5,7 @@ import { toggleFavourite, checkFavouriteStatus } from '../../api/favourite.api';
 const FALLBACK = 'https://images.placeholders.dev/?width=500&height=750&text=No+Image&bgColor=%23222';
 const FALLBACK_POSTER = FALLBACK;
 
-const MovieCard = ({ movie }) => {
+const MovieCard = ({ movie, dark = false }) => {
     const [isLiked, setIsLiked] = useState(false);
     const [animating, setAnimating] = useState(false);
 
@@ -57,7 +57,7 @@ const MovieCard = ({ movie }) => {
         <Link to={`/watch/${mediaType}/${id}`} className="block">
             <div className="relative group cursor-pointer transition-transform duration-300 ease-out hover:scale-105">
                 {/* Poster Image */}
-                <div className="relative aspect-[2/3] overflow-hidden rounded-lg shadow-md bg-gray-200">
+                <div className={`relative aspect-[2/3] overflow-hidden rounded-xl shadow-md ${dark ? 'bg-white/5' : 'bg-gray-200'}`}>
                     <img
                         src={getPosterUrl()}
                         alt={movie?.title || movie?.name}
@@ -89,9 +89,9 @@ const MovieCard = ({ movie }) => {
                 </div>
 
                 {/* Info Below Card */}
-                <div className="mt-2">
-                    <h3 className="text-sm font-bold truncate text-gray-900">{movie?.title || movie?.name}</h3>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="mt-2.5">
+                    <h3 className={`text-sm font-semibold truncate ${dark ? 'text-white/90' : 'text-gray-900'}`}>{movie?.title || movie?.name}</h3>
+                    <div className={`flex items-center gap-2 text-xs ${dark ? 'text-white/40' : 'text-gray-500'}`}>
                         <span className="text-yellow-500 font-bold">★ {movie?.vote_average?.toFixed(1) || 'N/A'}</span>
                         <span>•</span>
                         <span>{movie?.release_date?.split('-')[0] || movie?.first_air_date?.split('-')[0] || '2024'}</span>
