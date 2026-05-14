@@ -5,17 +5,16 @@ import MovieCarousel from '../components/movies/MovieCarousel';
 
 const Home = () => {
     return (
-        <div className="bg-background min-h-screen pb-20">
+        <div className="bg-surfaceDark min-h-screen pb-20">
             <Hero />
 
-            <div className="relative z-20 -mt-10 lg:mt-11">
+            <div className="relative z-20 -mt-6 sm:-mt-8 lg:-mt-10">
                 <MovieRow title="Trending Now" endpoint="/media/trending/movie" />
                 <MovieRow title="Action Packed" endpoint="/media/search?q=action" />
 
                 <MovieCarousel title="High Rated Anime" endpoint="/media/search?q=anime" minRating={7.5} />
 
                 <MovieRow title="TV Shows" endpoint="/media/trending/tv" />
-                {/* <MovieRow title="High Rated Movies" endpoint="/media/search?q=movies" minRating={7.5} /> */}
             </div>
         </div>
     );

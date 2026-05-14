@@ -18,7 +18,7 @@ function AppContent() {
   const hideNavbarPaths = ['/login', '/signup'];
 
   return (
-    <div className="font-sans text-textMain min-h-screen bg-background overflow-x-hidden">
+    <div className="font-sans text-white min-h-screen bg-surfaceDark overflow-x-hidden">
       {!hideNavbarPaths.includes(location.pathname) && <Navbar />}
 
       <Routes>

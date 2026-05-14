@@ -4,9 +4,9 @@
   --color-brand: #E50914;
   --color-tmdbBlue: #01B4E4;
   --color-surface: #FFFFFF;
-  --color-background: #F8F9FA;
+  --color-background: #0d0d1a;
   --color-textMain: #141414;
-  --color-surfaceDark: #1a1a2e;
+  --color-surfaceDark: #0d0d1a;
   --color-cardDark: #16213e;
   --color-gold: #f5c518;
 
@@ -25,6 +25,7 @@ html {
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #0d0d1a;
 }
 
 @layer utilities {
@@ -48,26 +49,34 @@ body {
   }
 }
 
-/* Swiper carousel overrides */
+/* Swiper carousel overrides — dark theme */
 .carousel-swiper .swiper-button-next,
 .carousel-swiper .swiper-button-prev {
-  color: #E50914;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(4px);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.carousel-swiper .swiper-button-next:hover,
+.carousel-swiper .swiper-button-prev:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .carousel-swiper .swiper-button-next::after,
 .carousel-swiper .swiper-button-prev::after {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
 }
 
 .carousel-swiper .swiper-pagination-bullet {
-  background: #d1d5db;
+  background: rgba(255, 255, 255, 0.3);
   opacity: 1;
 }
 

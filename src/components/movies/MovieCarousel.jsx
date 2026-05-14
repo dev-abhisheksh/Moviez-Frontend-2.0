@@ -9,7 +9,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-const FALLBACK = 'https://images.placeholders.dev/?width=500&height=750&text=No+Image&bgColor=%23222';
+const FALLBACK = 'https://images.placeholders.dev/?width=500&height=750&text=No+Image&bgColor=%231a1a2e';
 
 const MovieCarousel = ({ title, endpoint, minRating = 0 }) => {
     const [movies, setMovies] = useState([]);
@@ -90,17 +90,17 @@ const MovieCarousel = ({ title, endpoint, minRating = 0 }) => {
     };
 
     return (
-        <div ref={ref} className="my-10 px-8 lg:px-16">
-            <h2 className="text-xl lg:text-2xl font-black mb-6 text-textMain border-l-4 border-brand pl-3 uppercase tracking-tighter">
+        <div ref={ref} className="my-10 sm:my-12 lg:my-14 px-6 sm:px-8 lg:px-16">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-black mb-5 sm:mb-6 text-white border-l-4 border-brand pl-3 uppercase tracking-tighter">
                 {title}
             </h2>
 
             {loading && (
-                <div className="flex gap-4 overflow-hidden">
+                <div className="flex gap-3 sm:gap-4 overflow-hidden">
                     {[1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="min-w-[220px] space-y-3 animate-pulse">
-                            <div className="aspect-[2/3] bg-gray-200 rounded-xl" />
-                            <div className="h-4 bg-gray-200 rounded w-3/4" />
+                        <div key={i} className="min-w-[140px] sm:min-w-[180px] md:min-w-[220px] space-y-3">
+                            <div className="aspect-[2/3] bg-white/10 rounded-xl skeleton-shimmer" />
+                            <div className="h-4 bg-white/10 rounded w-3/4 skeleton-shimmer" />
                         </div>
                     ))}
                 </div>
@@ -109,16 +109,17 @@ const MovieCarousel = ({ title, endpoint, minRating = 0 }) => {
             {!loading && movies.length > 0 && (
                 <Swiper
                     modules={[Navigation, Pagination, Autoplay]}
-                    spaceBetween={20}
+                    spaceBetween={16}
                     slidesPerView={2}
                     navigation
                     loop={movies.length >= 4}
                     pagination={{ clickable: true }}
                     autoplay={{ delay: 4000, disableOnInteraction: false }}
                     breakpoints={{
-                        640: { slidesPerView: 3 },
-                        1024: { slidesPerView: 4 },
-                        1280: { slidesPerView: 5 },
+                        480: { slidesPerView: 2, spaceBetween: 16 },
+                        640: { slidesPerView: 3, spaceBetween: 16 },
+                        1024: { slidesPerView: 4, spaceBetween: 20 },
+                        1280: { slidesPerView: 5, spaceBetween: 20 },
                     }}
                     className="carousel-swiper"
                 >
@@ -131,7 +132,7 @@ const MovieCarousel = ({ title, endpoint, minRating = 0 }) => {
                             <SwiperSlide key={id}>
                                 <Link to={`/watch/${mediaType}/${id}`}>
                                     <div className="group cursor-pointer transition-transform duration-300 hover:scale-105">
-                                        <div className="relative aspect-[2/3] overflow-hidden rounded-xl shadow-lg bg-gray-200">
+                                        <div className="relative aspect-[2/3] overflow-hidden rounded-xl shadow-lg bg-white/5">
                                             <img
                                                 src={getPoster(movie)}
                                                 alt={movie.title || movie.name}
@@ -140,18 +141,21 @@ const MovieCarousel = ({ title, endpoint, minRating = 0 }) => {
                                             />
                                             {/* Rating badge */}
                                             {movie.vote_average > 0 && (
-                                                <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm text-yellow-400 text-xs font-bold px-2 py-1 rounded-lg">
+                                                <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm text-gold text-xs font-bold px-2 py-1 rounded-lg">
                                                     ★ {movie.vote_average?.toFixed(1)}
                                                 </div>
                                             )}
-                                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <span className="bg-white text-black p-3 rounded-full shadow-lg">▶</span>
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                                <span className="bg-white/20 backdrop-blur-md text-white p-3 rounded-full border border-white/20 shadow-lg">▶</span>
                                             </div>
                                         </div>
-                                        <div className="mt-2">
-                                            <h3 className="text-sm font-bold truncate text-gray-900">
+                                        <div className="mt-2.5">
+                                            <h3 className="text-sm font-semibold truncate text-white/90">
                                                 {movie.title || movie.name}
                                             </h3>
+                                            <p className="text-xs text-white/40 mt-0.5">
+                                                {movie?.release_date?.split('-')[0] || movie?.first_air_date?.split('-')[0] || ''}
+                                            </p>
                                         </div>
                                     </div>
                                 </Link>

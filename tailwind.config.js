@@ -7,7 +7,7 @@ export default {
                 brand: '#E50914', // Netflix Red
                 tmdbBlue: '#01B4E4',
                 surface: '#FFFFFF',
-                background: '#F8F9FA',
+                background: '#0d0d1a',
                 textMain: '#141414',
                 surfaceDark: '#1a1a2e',
                 cardDark: '#16213e',
