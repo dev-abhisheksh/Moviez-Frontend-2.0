@@ -12,6 +12,7 @@ import History from './pages/History';
 import ProfilePage from './pages/ProfilePage';
 import MediaUpload from './pages/Admin/MediaUpload';
 import Dashboard from './pages/Admin/Dashboard';
+import CategoryPage from './pages/CategoryPage';
 
 function AppContent() {
   const location = useLocation();
@@ -27,6 +28,7 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<RegisterPage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/category/:slug" element={<CategoryPage />} />
 
         {/* Protected Routes */}
         <Route

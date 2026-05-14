@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
+import { Link } from 'react-router-dom';
 import MovieCard from './MovieCard';
 import { API } from '../../api/media.api';
 
-const MovieRow = ({ title, endpoint, minRating = 0, dark = false }) => {
+const MovieRow = ({ title, endpoint, minRating = 0, dark = false, categorySlug }) => {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(false);
     const [fetched, setFetched] = useState(false);
@@ -47,9 +48,23 @@ const MovieRow = ({ title, endpoint, minRating = 0, dark = false }) => {
 
     return (
         <div ref={ref} className="my-10 sm:my-12 lg:my-14 px-6 sm:px-8 lg:px-16">
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-black mb-4 sm:mb-5 border-l-4 border-brand pl-3 uppercase tracking-tighter text-white">
-                {title}
-            </h2>
+            {/* Section Header with See All */}
+            <div className="flex items-center justify-between mb-4 sm:mb-5">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-black border-l-4 border-brand pl-3 uppercase tracking-tighter text-white">
+                    {title}
+                </h2>
+                {categorySlug && (
+                    <Link
+                        to={`/category/${categorySlug}`}
+                        className="flex items-center gap-1 text-sm font-semibold text-white/40 hover:text-brand transition-colors duration-200 group"
+                    >
+                        See All
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </Link>
+                )}
+            </div>
 
             {loading && (
                 <div className="flex gap-3 sm:gap-4 overflow-hidden">
