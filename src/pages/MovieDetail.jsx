@@ -267,77 +267,105 @@ const MovieDetail = () => {
                 {/* ─── VidKing Player (replaces hero when active) ─── */}
                 {showPlayer && (() => {
                     const SERVERS = [
-                        { label: 'Server 1', id: 'vidking', getUrl: (id, type, s, e) => type === 'tv' ? `https://www.vidking.net/embed/tv/${id}/${s}/${e}?color=e50914` : `https://www.vidking.net/embed/movie/${id}?color=e50914` },
-                        { label: 'Server 2', id: 'vidbinge', getUrl: (id, type, s, e) => type === 'tv' ? `https://vidbinge.dev/embed/tv/${id}/${s}/${e}` : `https://vidbinge.dev/embed/movie/${id}` },
-                        { label: 'Server 3', id: 'embed2', getUrl: (id, type, s, e) => type === 'tv' ? `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}` : `https://www.2embed.cc/embed/${id}` },
-                        { label: 'Server 4', id: 'multi', getUrl: (id, type, s, e) => type === 'tv' ? `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}` : `https://multiembed.mov/?video_id=${id}&tmdb=1` },
+                        {
+                            label: 'VidKing',
+                            id: 'vidking',
+                            icon: '⚡',
+                            getUrl: (id, type, s, e) => type === 'tv'
+                                ? `https://www.vidking.net/embed/tv/${id}/${s}/${e}?color=e50914&autoPlay=true&nextEpisode=true&episodeSelector=true`
+                                : `https://www.vidking.net/embed/movie/${id}?color=e50914&autoPlay=true`,
+                        },
+                        {
+                            label: 'VidSrc',
+                            id: 'vidsrc',
+                            icon: '🎬',
+                            getUrl: (id, type, s, e) => type === 'tv'
+                                ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`
+                                : `https://vidsrc.cc/v2/embed/movie/${id}`,
+                        },
                     ];
                     const tmdbId = movie.id || movie._id;
                     const type = mediaType || 'movie';
+                    const currentUrl = SERVERS.find(s => s.id === activeServer)?.getUrl(tmdbId, type, selectedSeason, selectedEpisode);
 
                     return (
-                        <div className="w-full bg-black pt-14">
-                            {/* Controls bar: servers + season/episode */}
-                            <div className="flex flex-wrap items-center gap-3 px-4 sm:px-8 py-3 bg-surfaceDark/90 backdrop-blur-sm border-b border-white/5">
-                                {/* Server tabs */}
-                                <div className="flex flex-wrap gap-2">
-                                    {SERVERS.map((srv) => (
-                                        <button
-                                            key={srv.id}
-                                            onClick={() => setActiveServer(srv.id)}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                                activeServer === srv.id
-                                                    ? 'bg-brand text-white'
-                                                    : 'bg-white/10 text-white/50 hover:bg-white/15 hover:text-white/80'
-                                            }`}
-                                        >
-                                            {srv.label}
-                                        </button>
-                                    ))}
-                                </div>
+                        <div className="w-full bg-black pt-[56px]">
+                            {/* ── Premium Control Bar ── */}
+                            <div className="bg-gradient-to-b from-[#0d0d1a] to-[#0a0a16] border-b border-white/[0.06]">
+                                <div className="flex flex-wrap items-center gap-3 sm:gap-4 px-4 sm:px-8 lg:px-12 py-3">
 
-                                {/* Season/Episode for TV */}
-                                {mediaType === 'tv' && (
-                                    <div className="flex items-center gap-3 ml-auto">
-                                        <div className="flex items-center gap-1.5">
-                                            <label className="text-white/40 text-xs font-semibold">S</label>
-                                            <select
-                                                value={selectedSeason}
-                                                onChange={(e) => { setSelectedSeason(Number(e.target.value)); setSelectedEpisode(1); }}
-                                                className="bg-white/10 border border-white/15 text-white text-sm rounded-lg px-2 py-1 focus:outline-none focus:border-brand/50"
+                                    {/* Server pills */}
+                                    <div className="flex items-center gap-1 bg-white/[0.04] rounded-xl p-1 border border-white/[0.06]">
+                                        {SERVERS.map((srv) => (
+                                            <button
+                                                key={srv.id}
+                                                onClick={() => setActiveServer(srv.id)}
+                                                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                                                    activeServer === srv.id
+                                                        ? 'bg-brand text-white shadow-md shadow-brand/25'
+                                                        : 'text-white/40 hover:text-white/70 hover:bg-white/[0.06]'
+                                                }`}
                                             >
-                                                {Array.from({ length: movie.number_of_seasons || 5 }, (_, i) => (
-                                                    <option key={i + 1} value={i + 1} className="bg-surfaceDark">{i + 1}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <label className="text-white/40 text-xs font-semibold">E</label>
-                                            <input
-                                                type="number"
-                                                min={1}
-                                                value={selectedEpisode}
-                                                onChange={(e) => setSelectedEpisode(Number(e.target.value) || 1)}
-                                                className="bg-white/10 border border-white/15 text-white text-sm rounded-lg px-2 py-1 w-16 focus:outline-none focus:border-brand/50"
-                                            />
-                                        </div>
+                                                <span className="text-sm">{srv.icon}</span>
+                                                {srv.label}
+                                            </button>
+                                        ))}
                                     </div>
-                                )}
 
-                                {/* Close */}
-                                <button
-                                    onClick={() => setShowPlayer(false)}
-                                    className="ml-auto bg-white/10 hover:bg-white/20 text-white/60 hover:text-white rounded-lg px-3 py-1.5 text-xs font-semibold transition"
-                                >
-                                    ✕ Close
-                                </button>
+                                    {/* Divider */}
+                                    <div className="hidden sm:block w-px h-6 bg-white/10" />
+
+                                    {/* Season/Episode for TV */}
+                                    {mediaType === 'tv' && (
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-1">
+                                                <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Season</span>
+                                                <select
+                                                    value={selectedSeason}
+                                                    onChange={(e) => { setSelectedSeason(Number(e.target.value)); setSelectedEpisode(1); }}
+                                                    className="bg-transparent text-white text-sm font-semibold focus:outline-none cursor-pointer appearance-none pr-1"
+                                                >
+                                                    {Array.from({ length: movie.number_of_seasons || 5 }, (_, i) => (
+                                                        <option key={i + 1} value={i + 1} className="bg-[#0d0d1a]">{i + 1}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-1">
+                                                <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Episode</span>
+                                                <input
+                                                    type="number"
+                                                    min={1}
+                                                    value={selectedEpisode}
+                                                    onChange={(e) => setSelectedEpisode(Number(e.target.value) || 1)}
+                                                    className="bg-transparent text-white text-sm font-semibold focus:outline-none w-10 text-center"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Right side: now playing + close */}
+                                    <div className="flex items-center gap-3 ml-auto">
+                                        <span className="hidden sm:flex items-center gap-1.5 text-[10px] text-white/20 font-semibold uppercase tracking-widest">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
+                                            Now Playing
+                                        </span>
+                                        <button
+                                            onClick={() => setShowPlayer(false)}
+                                            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/15 text-white/40 hover:text-white transition-all duration-200 hover:rotate-90"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
-                            {/* Iframe player */}
+                            {/* ── Video Frame ── */}
                             <div className="aspect-video w-full bg-black relative">
                                 <iframe
                                     key={`${activeServer}-${selectedSeason}-${selectedEpisode}`}
-                                    src={SERVERS.find(s => s.id === activeServer)?.getUrl(tmdbId, type, selectedSeason, selectedEpisode)}
+                                    src={currentUrl}
                                     title="Video Player"
                                     className="w-full h-full"
                                     frameBorder="0"
