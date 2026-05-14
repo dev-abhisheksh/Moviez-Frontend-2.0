@@ -5,7 +5,7 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import HomePage from './pages/Home';
 import LoginPage from './pages/Auth/LoginPage';
 import RegisterPage from './pages/Auth/RegisterPage';
-import SearchPage from './pages/Search';
+
 import MovieDetail from './pages/MovieDetail';
 import Favourites from './pages/Favourites';
 import History from './pages/History';
@@ -28,7 +28,7 @@ function AppContent() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<RegisterPage />} />
-        <Route path="/search" element={<SearchPage />} />
+
         <Route path="/category/:slug" element={<CategoryPage />} />
         <Route path="/download/:mediaType/:mediaId" element={<DownloadPage />} />
 

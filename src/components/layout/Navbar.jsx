@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import SearchModal from '../movies/SearchModal';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
     const location = useLocation();
     const token = localStorage.getItem('token');
     let user = null;
@@ -24,9 +26,20 @@ const Navbar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Ctrl+K / Cmd+K shortcut to open search
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                setSearchOpen(true);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
     const navLinks = [
         { to: '/', label: 'Home' },
-        { to: '/search', label: 'Search' },
         ...(token ? [
             { to: '/favourites', label: 'My List' },
             { to: '/history', label: 'History' },
@@ -47,7 +60,7 @@ const Navbar = () => {
 
                 {/* Desktop Nav */}
                 <div className="flex gap-10 items-center">
-                    <ul className="hidden lg:flex gap-6 text-sm font-medium text-white/60">
+                    <ul className="hidden lg:flex gap-6 text-sm font-medium text-white/60 items-center">
                         {navLinks.map(({ to, label }) => (
                             <li key={to}>
                                 <Link
@@ -66,6 +79,21 @@ const Navbar = () => {
                                 </Link>
                             </li>
                         )}
+
+                        {/* Search Button */}
+                        <li>
+                            <button
+                                onClick={() => setSearchOpen(true)}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] hover:border-white/15 transition-all duration-200 group"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-white/30 group-hover:text-white/50 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <circle cx="11" cy="11" r="8" />
+                                    <path strokeLinecap="round" d="m21 21-4.35-4.35" />
+                                </svg>
+                                <span className="text-white/30 text-xs group-hover:text-white/50 transition">Search</span>
+                                <kbd className="hidden sm:inline text-[10px] text-white/15 bg-white/[0.06] px-1.5 py-0.5 rounded font-mono ml-2">⌘K</kbd>
+                            </button>
+                        </li>
                     </ul>
 
                     {/* Desktop Auth */}
@@ -85,23 +113,30 @@ const Navbar = () => {
                         )}
                     </div>
 
-                    {/* Hamburger Button – mobile only */}
-                    <button
-                        onClick={() => setIsOpen(!isOpen)}
-                        className="relative z-[110] flex lg:hidden flex-col items-center justify-center w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm focus:outline-none"
-                        aria-label="Toggle menu"
-                        aria-expanded={isOpen}
-                    >
-                        <span
-                            className={`block h-0.5 w-5 bg-white rounded-full transition-all duration-300 ease-in-out ${isOpen ? 'rotate-45 translate-y-[5px]' : ''}`}
-                        />
-                        <span
-                            className={`block h-0.5 w-5 bg-white rounded-full mt-[4px] transition-all duration-300 ease-in-out ${isOpen ? 'opacity-0 scale-x-0' : ''}`}
-                        />
-                        <span
-                            className={`block h-0.5 w-5 bg-white rounded-full mt-[4px] transition-all duration-300 ease-in-out ${isOpen ? '-rotate-45 -translate-y-[5px]' : ''}`}
-                        />
-                    </button>
+                    {/* Mobile: search icon + hamburger */}
+                    <div className="flex items-center gap-2 lg:hidden">
+                        <button
+                            onClick={() => setSearchOpen(true)}
+                            className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm"
+                            aria-label="Search"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4.5 h-4.5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <circle cx="11" cy="11" r="8" />
+                                <path strokeLinecap="round" d="m21 21-4.35-4.35" />
+                            </svg>
+                        </button>
+
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="relative z-[110] flex flex-col items-center justify-center w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm focus:outline-none"
+                            aria-label="Toggle menu"
+                            aria-expanded={isOpen}
+                        >
+                            <span className={`block h-0.5 w-5 bg-white rounded-full transition-all duration-300 ease-in-out ${isOpen ? 'rotate-45 translate-y-[5px]' : ''}`} />
+                            <span className={`block h-0.5 w-5 bg-white rounded-full mt-[4px] transition-all duration-300 ease-in-out ${isOpen ? 'opacity-0 scale-x-0' : ''}`} />
+                            <span className={`block h-0.5 w-5 bg-white rounded-full mt-[4px] transition-all duration-300 ease-in-out ${isOpen ? '-rotate-45 -translate-y-[5px]' : ''}`} />
+                        </button>
+                    </div>
                 </div>
             </nav>
 
@@ -131,8 +166,22 @@ const Navbar = () => {
                     </button>
                 </div>
 
+                {/* Search in drawer */}
+                <div className="px-4 py-3">
+                    <button
+                        onClick={() => { setIsOpen(false); setSearchOpen(true); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.06] text-white/30 text-sm hover:bg-white/[0.08] transition"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <circle cx="11" cy="11" r="8" />
+                            <path strokeLinecap="round" d="m21 21-4.35-4.35" />
+                        </svg>
+                        Search...
+                    </button>
+                </div>
+
                 {/* Nav links */}
-                <ul className="flex flex-col px-4 py-4 gap-1">
+                <ul className="flex flex-col px-4 py-2 gap-1">
                     {navLinks.map(({ to, label }) => (
                         <li key={to}>
                             <Link
@@ -182,6 +231,9 @@ const Navbar = () => {
                     )}
                 </div>
             </div>
+
+            {/* Search Modal */}
+            <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
         </>
     );
 };
