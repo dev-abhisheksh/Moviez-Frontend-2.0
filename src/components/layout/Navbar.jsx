@@ -35,79 +35,77 @@ const Navbar = () => {
 
     return (
         <>
-            <nav className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-8 lg:px-16 py-3 transition-all duration-300 ${
-            scrolled
-                ? 'bg-black/40 backdrop-blur-xl'
-                : 'bg-gradient-to-b from-black/60 to-transparent'
-        }`}>
-            <div className="flex items-center gap-8">
-                <Link to="/" className="text-2xl font-black tracking-tighter text-brand">
-                    MOVIE<span className="text-white">HUB</span>
-                </Link>
-            </div>
-
-            {/* Desktop Nav */}
-            <div className="flex gap-10 items-center">
-                <ul className="hidden lg:flex gap-6 text-sm font-medium text-white/60">
-                    {navLinks.map(({ to, label }) => (
-                        <li key={to}>
-                            <Link
-                                to={to}
-                                className={`hover:text-white transition-colors duration-200 ${
-                                    location.pathname === to ? 'text-white font-semibold' : ''
-                                }`}
-                            >
-                                {label}
-                            </Link>
-                        </li>
-                    ))}
-                    {user?.role === 'admin' && (
-                        <li>
-                            <Link to="/admin/dashboard" className="hover:text-white transition-colors duration-200">
-                                Dashboard
-                            </Link>
-                        </li>
-                    )}
-                </ul>
-
-                {/* Desktop Auth */}
-                <div className="hidden lg:flex items-center gap-4">
-                    {token ? (
-                        <Link to="/profile">
-                            <img
-                                src={`https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=E50914&color=fff`}
-                                className="w-9 h-9 rounded-full border-2 border-white/20 hover:border-brand/60 transition-colors"
-                                alt="profile"
-                            />
-                        </Link>
-                    ) : (
-                        <Link to="/login" className="bg-brand text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition shadow-lg shadow-brand/20">
-                            Login
-                        </Link>
-                    )}
+            <nav className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-8 lg:px-16 py-3 transition-all duration-300 ${scrolled
+                    ? 'bg-black/40 backdrop-blur-xl'
+                    : 'bg-gradient-to-b from-black/60 to-transparent'
+                }`}>
+                <div className="flex items-center gap-8">
+                    <Link to="/" className="text-2xl font-black tracking-tighter text-brand">
+                        MOVIE<span className="text-white">HUB</span>
+                    </Link>
                 </div>
 
-                {/* Hamburger Button – mobile only */}
-                <button
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="relative z-[110] flex lg:hidden flex-col items-center justify-center w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm focus:outline-none"
-                    aria-label="Toggle menu"
-                    aria-expanded={isOpen}
-                >
-                    <span
-                        className={`block h-0.5 w-5 bg-white rounded-full transition-all duration-300 ease-in-out ${isOpen ? 'rotate-45 translate-y-[5px]' : ''}`}
-                    />
-                    <span
-                        className={`block h-0.5 w-5 bg-white rounded-full mt-[4px] transition-all duration-300 ease-in-out ${isOpen ? 'opacity-0 scale-x-0' : ''}`}
-                    />
-                    <span
-                        className={`block h-0.5 w-5 bg-white rounded-full mt-[4px] transition-all duration-300 ease-in-out ${isOpen ? '-rotate-45 -translate-y-[5px]' : ''}`}
-                    />
-                </button>
-            </div>
-        </nav>
+                {/* Desktop Nav */}
+                <div className="flex gap-10 items-center">
+                    <ul className="hidden lg:flex gap-6 text-sm font-medium text-white/60">
+                        {navLinks.map(({ to, label }) => (
+                            <li key={to}>
+                                <Link
+                                    to={to}
+                                    className={`hover:text-white transition-colors duration-200 ${location.pathname === to ? 'text-white font-semibold' : ''
+                                        }`}
+                                >
+                                    {label}
+                                </Link>
+                            </li>
+                        ))}
+                        {user?.role === 'admin' && (
+                            <li>
+                                <Link to="/admin/dashboard" className="hover:text-white transition-colors duration-200">
+                                    Dashboard
+                                </Link>
+                            </li>
+                        )}
+                    </ul>
 
-        {/* ===== Mobile Drawer ===== */}
+                    {/* Desktop Auth */}
+                    <div className="hidden lg:flex items-center gap-4">
+                        {token ? (
+                            <Link to="/profile">
+                                <img
+                                    src={`https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=E50914&color=fff`}
+                                    className="w-9 h-9 rounded-full border-2 border-white/20 hover:border-brand/60 transition-colors"
+                                    alt="profile"
+                                />
+                            </Link>
+                        ) : (
+                            <Link to="/login" className="bg-brand text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition shadow-lg shadow-brand/20">
+                                Login
+                            </Link>
+                        )}
+                    </div>
+
+                    {/* Hamburger Button – mobile only */}
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="relative z-[110] flex lg:hidden flex-col items-center justify-center w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm focus:outline-none"
+                        aria-label="Toggle menu"
+                        aria-expanded={isOpen}
+                    >
+                        <span
+                            className={`block h-0.5 w-5 bg-white rounded-full transition-all duration-300 ease-in-out ${isOpen ? 'rotate-45 translate-y-[5px]' : ''}`}
+                        />
+                        <span
+                            className={`block h-0.5 w-5 bg-white rounded-full mt-[4px] transition-all duration-300 ease-in-out ${isOpen ? 'opacity-0 scale-x-0' : ''}`}
+                        />
+                        <span
+                            className={`block h-0.5 w-5 bg-white rounded-full mt-[4px] transition-all duration-300 ease-in-out ${isOpen ? '-rotate-45 -translate-y-[5px]' : ''}`}
+                        />
+                    </button>
+                </div>
+            </nav>
+
+            {/* ===== Mobile Drawer ===== */}
 
             {/* Backdrop */}
             <div
@@ -139,11 +137,10 @@ const Navbar = () => {
                         <li key={to}>
                             <Link
                                 to={to}
-                                className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200 ${
-                                    location.pathname === to
+                                className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200 ${location.pathname === to
                                         ? 'bg-white/10 text-white'
                                         : 'text-white/60 hover:bg-white/5 hover:text-white'
-                                }`}
+                                    }`}
                             >
                                 {label}
                             </Link>
