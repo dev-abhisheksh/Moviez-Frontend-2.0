@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getMediaDetails, getMediaTrailer, getMovieCredits, getRecommendations } from '../api/media.api';
+import { getMediaDetails, getMediaTrailer, getMovieCredits, getRecommendations, getSeasonEpisodes } from '../api/media.api';
 import { toggleFavourite, checkFavouriteStatus } from '../api/favourite.api';
 import { addToHistory } from '../api/history.api';
 import TrailerModal from '../components/movies/TrailerModal';
@@ -45,6 +45,8 @@ const MovieDetail = () => {
     const [selectedEpisode, setSelectedEpisode] = useState(1);
     const [activeServer, setActiveServer] = useState('vidking');
     const [clickShield, setClickShield] = useState(true);
+    const [episodes, setEpisodes] = useState([]);
+    const [loadingEpisodes, setLoadingEpisodes] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -135,6 +137,25 @@ const MovieDetail = () => {
 
         if (mediaId) recordHistory();
     }, [mediaId, mediaType]);
+
+    // Fetch episodes when season changes (TV only)
+    useEffect(() => {
+        const fetchEpisodes = async () => {
+            if (mediaType !== 'tv' || !mediaId) return;
+            setLoadingEpisodes(true);
+            try {
+                const { data } = await getSeasonEpisodes(mediaId, selectedSeason);
+                setEpisodes(data.episodes || []);
+            } catch (err) {
+                console.error('Episodes fetch error:', err);
+                setEpisodes([]);
+            } finally {
+                setLoadingEpisodes(false);
+            }
+        };
+
+        fetchEpisodes();
+    }, [mediaId, mediaType, selectedSeason]);
 
     const handlePlayTrailer = async () => {
         if (!movie) return;
@@ -288,6 +309,7 @@ const MovieDetail = () => {
                     const tmdbId = movie.id || movie._id;
                     const type = mediaType || 'movie';
                     const currentUrl = SERVERS.find(s => s.id === activeServer)?.getUrl(tmdbId, type, selectedSeason, selectedEpisode);
+                    const tvSeasons = movie.seasons || [];
 
                     return (
                         <div className="w-full bg-black pt-[56px]">
@@ -301,11 +323,10 @@ const MovieDetail = () => {
                                             <button
                                                 key={srv.id}
                                                 onClick={() => setActiveServer(srv.id)}
-                                                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                                                    activeServer === srv.id
+                                                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${activeServer === srv.id
                                                         ? 'bg-brand text-white shadow-md shadow-brand/25'
                                                         : 'text-white/40 hover:text-white/70 hover:bg-white/[0.06]'
-                                                }`}
+                                                    }`}
                                             >
                                                 <span className="text-sm">{srv.icon}</span>
                                                 {srv.label}
@@ -313,34 +334,13 @@ const MovieDetail = () => {
                                         ))}
                                     </div>
 
-                                    {/* Divider */}
-                                    <div className="hidden sm:block w-px h-6 bg-white/10" />
-
-                                    {/* Season/Episode for TV */}
+                                    {/* Now playing info */}
                                     {mediaType === 'tv' && (
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-1">
-                                                <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Season</span>
-                                                <select
-                                                    value={selectedSeason}
-                                                    onChange={(e) => { setSelectedSeason(Number(e.target.value)); setSelectedEpisode(1); }}
-                                                    className="bg-transparent text-white text-sm font-semibold focus:outline-none cursor-pointer appearance-none pr-1"
-                                                >
-                                                    {Array.from({ length: movie.number_of_seasons || 5 }, (_, i) => (
-                                                        <option key={i + 1} value={i + 1} className="bg-[#0d0d1a]">{i + 1}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg px-2.5 py-1">
-                                                <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Episode</span>
-                                                <input
-                                                    type="number"
-                                                    min={1}
-                                                    value={selectedEpisode}
-                                                    onChange={(e) => setSelectedEpisode(Number(e.target.value) || 1)}
-                                                    className="bg-transparent text-white text-sm font-semibold focus:outline-none w-10 text-center"
-                                                />
-                                            </div>
+                                        <div className="hidden sm:flex items-center gap-2">
+                                            <div className="w-px h-6 bg-white/10" />
+                                            <span className="text-xs text-white/50 font-medium">
+                                                S{selectedSeason} · E{selectedEpisode}
+                                            </span>
                                         </div>
                                     )}
 
@@ -362,29 +362,157 @@ const MovieDetail = () => {
                                 </div>
                             </div>
 
-                            {/* ── Video Frame ── */}
-                            <div className="aspect-video w-full bg-black relative">
-                                {/* Click shield: absorbs the first click (ad redirect) then disappears */}
-                                {clickShield && (
-                                    <div
-                                        className="absolute inset-0 z-10 cursor-pointer"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            setClickShield(false);
-                                        }}
+                            {/* ── Video Frame + Episode Sidebar ── */}
+                            <div className={`flex ${mediaType === 'tv' ? 'flex-col lg:flex-row' : ''}`}>
+                                {/* Video Player */}
+                                <div className={`${mediaType === 'tv' ? 'w-full lg:flex-1' : 'w-full'} aspect-video bg-black relative`}>
+                                    {/* Click shield */}
+                                    {clickShield && (
+                                        <div
+                                            className="absolute inset-0 z-10 cursor-pointer"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setClickShield(false);
+                                            }}
+                                        />
+                                    )}
+                                    <iframe
+                                        key={`${activeServer}-${selectedSeason}-${selectedEpisode}`}
+                                        src={currentUrl}
+                                        title="Video Player"
+                                        className="w-full h-full"
+                                        frameBorder="0"
+                                        allowFullScreen
+                                        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                                        onLoad={() => setClickShield(true)}
                                     />
+                                </div>
+
+                                {/* ── Episode Sidebar (TV only) ── */}
+                                {mediaType === 'tv' && (
+                                    <div className="w-full lg:w-[380px] bg-[#0d0d1a] border-l border-white/[0.06] flex flex-col max-h-[80vh] lg:max-h-none">
+                                        {/* Season selector */}
+                                        <div className="p-4 border-b border-white/[0.06] flex-shrink-0">
+                                            <h3 className="text-white font-bold text-base mb-3">Episodes</h3>
+                                            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                                                {(tvSeasons.length > 0 ? tvSeasons : Array.from({ length: movie.number_of_seasons || 1 }, (_, i) => ({ season_number: i + 1, name: `Season ${i + 1}` }))).map((season) => (
+                                                    <button
+                                                        key={season.season_number}
+                                                        onClick={() => { setSelectedSeason(season.season_number); setSelectedEpisode(1); }}
+                                                        className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${selectedSeason === season.season_number
+                                                                ? 'bg-brand text-white shadow-md shadow-brand/25'
+                                                                : 'bg-white/[0.06] text-white/50 hover:text-white/80 hover:bg-white/[0.1]'
+                                                            }`}
+                                                    >
+                                                        S{season.season_number}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Episode list */}
+                                        <div className="flex-1 overflow-y-auto scrollbar-hide">
+                                            {loadingEpisodes ? (
+                                                <div className="p-4 space-y-3">
+                                                    {Array.from({ length: 6 }).map((_, i) => (
+                                                        <div key={i} className="flex gap-3 animate-pulse">
+                                                            <div className="w-28 h-16 bg-white/[0.06] rounded-lg flex-shrink-0" />
+                                                            <div className="flex-1 space-y-2 py-1">
+                                                                <div className="h-3 bg-white/[0.06] rounded w-3/4" />
+                                                                <div className="h-2 bg-white/[0.04] rounded w-1/2" />
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : episodes.length > 0 ? (
+                                                <div className="p-2">
+                                                    {episodes.map((ep) => (
+                                                        <button
+                                                            key={ep.episode_number}
+                                                            onClick={() => setSelectedEpisode(ep.episode_number)}
+                                                            className={`w-full flex gap-3 p-2.5 rounded-xl text-left transition-all duration-200 group ${selectedEpisode === ep.episode_number
+                                                                    ? 'bg-brand/15 border border-brand/30'
+                                                                    : 'hover:bg-white/[0.06] border border-transparent'
+                                                                }`}
+                                                        >
+                                                            {/* Episode thumbnail */}
+                                                            <div className="relative w-28 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-white/[0.04]">
+                                                                {ep.still_path ? (
+                                                                    <img
+                                                                        src={`https://image.tmdb.org/t/p/w300${ep.still_path}`}
+                                                                        alt={ep.name}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full flex items-center justify-center text-white/20">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                                                                            <path d="M8 5v14l11-7z" />
+                                                                        </svg>
+                                                                    </div>
+                                                                )}
+                                                                {/* Playing indicator */}
+                                                                {selectedEpisode === ep.episode_number && (
+                                                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                                                        <div className="flex items-center gap-0.5">
+                                                                            <span className="w-0.5 h-3 bg-brand rounded-full animate-pulse" />
+                                                                            <span className="w-0.5 h-4 bg-brand rounded-full animate-pulse" style={{ animationDelay: '0.15s' }} />
+                                                                            <span className="w-0.5 h-2.5 bg-brand rounded-full animate-pulse" style={{ animationDelay: '0.3s' }} />
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                {/* Duration badge */}
+                                                                {ep.runtime > 0 && (
+                                                                    <span className="absolute bottom-1 right-1 text-[9px] bg-black/70 text-white/80 px-1.5 py-0.5 rounded font-medium">
+                                                                        {ep.runtime}m
+                                                                    </span>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Episode info */}
+                                                            <div className="flex-1 min-w-0 py-0.5">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className={`text-[10px] font-bold uppercase tracking-wider ${selectedEpisode === ep.episode_number ? 'text-brand' : 'text-white/30'
+                                                                        }`}>
+                                                                        E{ep.episode_number}
+                                                                    </span>
+                                                                    {ep.vote_average > 0 && (
+                                                                        <span className="text-[10px] text-gold/70 font-medium">★ {ep.vote_average.toFixed(1)}</span>
+                                                                    )}
+                                                                </div>
+                                                                <p className={`text-sm font-semibold truncate mt-0.5 ${selectedEpisode === ep.episode_number ? 'text-white' : 'text-white/70 group-hover:text-white/90'
+                                                                    }`}>
+                                                                    {ep.name}
+                                                                </p>
+                                                                {ep.overview && (
+                                                                    <p className="text-[11px] text-white/30 line-clamp-2 mt-0.5 leading-relaxed">
+                                                                        {ep.overview}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                /* Fallback: simple episode number list */
+                                                <div className="p-4 grid grid-cols-5 gap-2">
+                                                    {Array.from({ length: 24 }, (_, i) => (
+                                                        <button
+                                                            key={i + 1}
+                                                            onClick={() => setSelectedEpisode(i + 1)}
+                                                            className={`py-2 rounded-lg text-xs font-bold transition-all ${selectedEpisode === i + 1
+                                                                    ? 'bg-brand text-white shadow-md shadow-brand/25'
+                                                                    : 'bg-white/[0.06] text-white/50 hover:bg-white/[0.1] hover:text-white/80'
+                                                                }`}
+                                                        >
+                                                            {i + 1}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 )}
-                                <iframe
-                                    key={`${activeServer}-${selectedSeason}-${selectedEpisode}`}
-                                    src={currentUrl}
-                                    title="Video Player"
-                                    className="w-full h-full"
-                                    frameBorder="0"
-                                    allowFullScreen
-                                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                                    onLoad={() => setClickShield(true)}
-                                />
                             </div>
                         </div>
                     );

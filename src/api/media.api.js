@@ -24,3 +24,6 @@ export const createMediaAdmin = (formData) => API.post('/media/admin/create', fo
 
 // Airing Anime
 export const getAiringAnime = (page = 1) => API.get(`/media/anime/airing?page=${page}`);
+
+// TV Season Episodes
+export const getSeasonEpisodes = (tvId, seasonNumber) => API.get(`/media/tv/${tvId}/season/${seasonNumber}`);
