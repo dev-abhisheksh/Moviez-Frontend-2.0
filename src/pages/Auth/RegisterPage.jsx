@@ -67,7 +67,7 @@ const RegisterPage = () => {
 
                 {/* Password with toggle */}
                 <div className="flex flex-col gap-1.5 w-full">
-                    <label className="text-sm font-semibold text-gray-700 ml-1">Password</label>
+                    <label className="text-sm font-semibold text-gray-300 ml-1">Password</label>
                     <div className="relative">
                         <input
                             type={showPassword ? 'text' : 'password'}
@@ -76,12 +76,12 @@ const RegisterPage = () => {
                             onChange={handleChange}
                             placeholder="Minimum 6 characters"
                             required
-                            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-tmdbBlue focus:border-transparent outline-none transition duration-200 pr-16"
+                            className="w-full px-4 py-2.5 bg-cardDark border border-gray-700 text-white placeholder-gray-500 rounded-lg text-sm focus:ring-2 focus:ring-tmdbBlue focus:border-transparent outline-none transition duration-200 pr-16"
                         />
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-500 hover:text-gray-700 transition"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-500 hover:text-gray-300 transition"
                         >
                             {showPassword ? 'Hide' : 'Show'}
                         </button>
@@ -100,13 +100,13 @@ const RegisterPage = () => {
 
                 {/* Error message */}
                 {error && (
-                    <p className="text-red-500 text-sm font-semibold bg-red-50 px-4 py-2 rounded-lg">{error}</p>
+                    <p className="text-red-400 text-sm font-semibold bg-red-900/20 px-4 py-2 rounded-lg">{error}</p>
                 )}
 
                 {/* Terms */}
                 <div className="flex items-start gap-2 mt-2">
-                    <input type="checkbox" className="mt-1 rounded border-gray-300 text-brand focus:ring-brand" required />
-                    <p className="text-xs text-gray-500">
+                    <input type="checkbox" className="mt-1 rounded border-gray-600 bg-gray-700 text-brand focus:ring-brand" required />
+                    <p className="text-xs text-gray-400">
                         I agree to the <span className="text-tmdbBlue cursor-pointer">Terms of Service</span> and <span className="text-tmdbBlue cursor-pointer">Privacy Policy</span>.
                     </p>
                 </div>
@@ -115,7 +115,7 @@ const RegisterPage = () => {
                     {loading ? 'Creating Account...' : 'Create Account'}
                 </Button>
 
-                <p className="text-center text-sm text-gray-600 mt-6">
+                <p className="text-center text-sm text-gray-400 mt-6">
                     Already have an account?{' '}
                     <Link to="/login" className="text-brand font-bold hover:underline">
                         Log in

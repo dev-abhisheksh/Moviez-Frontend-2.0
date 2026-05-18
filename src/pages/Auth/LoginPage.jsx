@@ -38,7 +38,7 @@ const LoginPage = () => {
     return (
         <AuthLayout title="Welcome Back" subtitle="Log in to your MovieHub account">
             <form className="space-y-5" onSubmit={handleSubmit}>
-                {error && <p className="text-red-500 text-xs font-bold bg-red-50 p-2 rounded">{error}</p>}
+                {error && <p className="text-red-400 text-xs font-bold bg-red-900/20 p-2 rounded">{error}</p>}
 
                 <Input
                     label="Email Address"
@@ -61,7 +61,7 @@ const LoginPage = () => {
                     {loading ? 'Logging in...' : 'Sign In'}
                 </Button>
 
-                <p className="text-center text-sm text-gray-600 mt-6">
+                <p className="text-center text-sm text-gray-400 mt-6">
                     New to MovieHub?{' '}
                     <Link to="/signup" className="text-brand font-bold hover:underline">Create an account</Link>
                 </p>
