@@ -391,7 +391,7 @@ const MovieDetail = () => {
 
                                 {/* ── Episode Sidebar (TV only) ── */}
                                 {mediaType === 'tv' && (
-                                    <div className="w-full lg:w-[380px] bg-[#0d0d1a] border-l border-white/[0.06] flex flex-col max-h-[80vh] lg:max-h-none">
+                                    <div className="w-full lg:w-[380px] bg-[#0d0d1a] border-l border-white/[0.06] flex flex-col max-h-[60vh] lg:max-h-[calc(56.25vw-213.75px)]" style={{ minHeight: '300px' }}>
                                         {/* Season selector */}
                                         <div className="p-4 border-b border-white/[0.06] flex-shrink-0">
                                             <h3 className="text-white font-bold text-base mb-3">Episodes</h3>
