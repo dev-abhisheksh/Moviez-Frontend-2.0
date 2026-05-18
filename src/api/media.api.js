@@ -27,3 +27,7 @@ export const getAiringAnime = (page = 1) => API.get(`/media/anime/airing?page=${
 
 // TV Season Episodes
 export const getSeasonEpisodes = (tvId, seasonNumber) => API.get(`/media/tv/${tvId}/season/${seasonNumber}`);
+
+// Discover by Genre
+export const discoverByGenre = (genres, type = 'movie', page = 1) => 
+    API.get(`/media/discover?genres=${genres}&type=${type}&page=${page}`);

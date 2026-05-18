@@ -200,16 +200,16 @@ const SearchModal = ({ isOpen, onClose }) => {
                                     <p className="text-[10px] text-white/20 font-bold uppercase tracking-widest mb-3">Quick Links</p>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                         {[
-                                            { label: 'Trending Movies', emoji: '🔥', q: 'popular' },
-                                            { label: 'Anime', emoji: '🎌', q: 'anime' },
-                                            { label: 'Action', emoji: '💥', q: 'action' },
-                                            { label: 'Horror', emoji: '👻', q: 'horror' },
-                                            { label: 'Comedy', emoji: '😂', q: 'comedy' },
-                                            { label: 'Sci-Fi', emoji: '🚀', q: 'sci-fi' },
+                                            { label: 'Trending', emoji: '🔥', action: () => { onClose(); navigate('/category/trending-movies'); } },
+                                            { label: 'Anime', emoji: '🎌', action: () => { onClose(); navigate('/discover?genres=16&type=tv'); } },
+                                            { label: 'Action', emoji: '💥', action: () => { onClose(); navigate('/discover?genres=28&type=movie'); } },
+                                            { label: 'Horror', emoji: '👻', action: () => { onClose(); navigate('/discover?genres=27&type=movie'); } },
+                                            { label: 'Comedy', emoji: '😂', action: () => { onClose(); navigate('/discover?genres=35&type=movie'); } },
+                                            { label: 'Sci-Fi', emoji: '🚀', action: () => { onClose(); navigate('/discover?genres=878&type=movie'); } },
                                         ].map((item) => (
                                             <button
-                                                key={item.q}
-                                                onClick={() => setQuery(item.q)}
+                                                key={item.label}
+                                                onClick={item.action}
                                                 className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.07] hover:border-white/[0.12] transition-all duration-200 text-left group"
                                             >
                                                 <span className="text-lg">{item.emoji}</span>

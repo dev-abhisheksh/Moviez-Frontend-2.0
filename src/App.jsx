@@ -13,6 +13,7 @@ import History from './pages/History';
 import MediaUpload from './pages/Admin/MediaUpload';
 import Dashboard from './pages/Admin/Dashboard';
 import CategoryPage from './pages/CategoryPage';
+import DiscoverPage from './pages/DiscoverPage';
 import DownloadPage from './pages/DownloadPage';
 
 function AppContent() {
@@ -30,6 +31,7 @@ function AppContent() {
         <Route path="/signup" element={<RegisterPage />} />
 
         <Route path="/category/:slug" element={<CategoryPage />} />
+        <Route path="/discover" element={<DiscoverPage />} />
         <Route path="/download/:mediaType/:mediaId" element={<DownloadPage />} />
 
         {/* Protected Routes */}
