@@ -9,7 +9,7 @@ import RegisterPage from './pages/Auth/RegisterPage';
 import MovieDetail from './pages/MovieDetail';
 import Favourites from './pages/Favourites';
 import History from './pages/History';
-import ProfilePage from './pages/ProfilePage';
+
 import MediaUpload from './pages/Admin/MediaUpload';
 import Dashboard from './pages/Admin/Dashboard';
 import CategoryPage from './pages/CategoryPage';
@@ -57,14 +57,7 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
+
         <Route
           path="/admin/upload"
           element={

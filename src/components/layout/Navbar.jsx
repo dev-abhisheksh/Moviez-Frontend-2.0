@@ -97,15 +97,27 @@ const Navbar = () => {
                     </ul>
 
                     {/* Desktop Auth */}
-                    <div className="hidden lg:flex items-center gap-4">
+                    <div className="hidden lg:flex items-center gap-3">
                         {token ? (
-                            <Link to="/profile">
-                                <img
-                                    src={`https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=E50914&color=fff`}
-                                    className="w-9 h-9 rounded-full border-2 border-white/20 hover:border-brand/60 transition-colors"
-                                    alt="profile"
-                                />
-                            </Link>
+                            <>
+                                <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+                                    <img
+                                        src={`https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=E50914&color=fff`}
+                                        className="w-7 h-7 rounded-full"
+                                        alt="avatar"
+                                    />
+                                    <span className="text-sm font-medium text-white/70">{user?.name?.split(' ')[0] || 'User'}</span>
+                                </div>
+                                <button
+                                    onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
+                                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-white/50 hover:text-white hover:bg-white/[0.08] transition-all duration-200"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    Logout
+                                </button>
+                            </>
                         ) : (
                             <Link to="/login" className="bg-brand text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition shadow-lg shadow-brand/20">
                                 Login
@@ -210,17 +222,23 @@ const Navbar = () => {
                 {/* Auth section */}
                 <div className="px-4 mt-2 border-t border-white/10 pt-4">
                     {token ? (
-                        <Link
-                            to="/profile"
-                            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition"
+                        <button
+                            onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
+                            className="flex items-center gap-3 w-full px-4 py-3 rounded-lg hover:bg-white/5 transition text-left"
                         >
                             <img
                                 src={`https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=E50914&color=fff`}
                                 className="w-9 h-9 rounded-full border-2 border-white/20"
-                                alt="profile"
+                                alt="avatar"
                             />
-                            <span className="text-sm font-medium text-white/80">Profile</span>
-                        </Link>
+                            <div className="flex-1">
+                                <span className="text-sm font-medium text-white/80 block">{user?.name || 'User'}</span>
+                                <span className="text-xs text-white/30">Tap to logout</span>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                        </button>
                     ) : (
                         <Link
                             to="/login"
