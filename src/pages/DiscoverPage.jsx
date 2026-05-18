@@ -140,7 +140,7 @@ const DiscoverPage = () => {
                 </h1>
 
                 {/* Filters Section */}
-                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 mb-8">
+                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 sm:p-5 mb-6 sm:mb-8">
                     <div className="flex flex-col md:flex-row md:items-start gap-8">
                         
                         {/* Media Type Toggle */}

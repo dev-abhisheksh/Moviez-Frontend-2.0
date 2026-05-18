@@ -166,8 +166,7 @@ const SearchModal = ({ isOpen, onClose }) => {
                                 placeholder="Search movies, TV shows, anime..."
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                className="flex-1 px-4 py-4.5 bg-transparent text-white text-base placeholder-white/25 focus:outline-none"
-                                style={{ paddingTop: '18px', paddingBottom: '18px' }}
+                                className="flex-1 px-4 py-3.5 sm:py-4.5 bg-transparent text-white text-sm sm:text-base placeholder-white/25 focus:outline-none"
                             />
 
                             {/* Right side controls */}
@@ -198,7 +197,7 @@ const SearchModal = ({ isOpen, onClose }) => {
                             {!loading && query.length < 2 && (
                                 <div className="px-5 py-6">
                                     <p className="text-[10px] text-white/20 font-bold uppercase tracking-widest mb-3">Quick Links</p>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                                         {[
                                             { label: 'Trending', emoji: '🔥', action: () => { onClose(); navigate('/category/trending-movies'); } },
                                             { label: 'Anime', emoji: '🎌', action: () => { onClose(); navigate('/discover?genres=16&type=tv'); } },
@@ -217,7 +216,7 @@ const SearchModal = ({ isOpen, onClose }) => {
                                             </button>
                                         ))}
                                     </div>
-                                    <div className="flex items-center gap-4 mt-5 pt-4 border-t border-white/[0.04]">
+                                    <div className="hidden sm:flex items-center gap-4 mt-5 pt-4 border-t border-white/[0.04]">
                                         <div className="flex items-center gap-1.5 text-[10px] text-white/15">
                                             <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06] font-mono">↑↓</kbd>
                                             <span>Navigate</span>
