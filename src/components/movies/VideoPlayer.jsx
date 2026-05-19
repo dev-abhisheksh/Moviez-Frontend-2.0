@@ -147,8 +147,8 @@ const VideoPlayer = ({
                     title="VidKing Player"
                     className="w-full h-full"
                     frameBorder="0"
-                    allowFullScreen
-                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    allowFullScreen={true}
+                    allow="autoplay; encrypted-media; picture-in-picture"
                     onLoad={() => setIframeLoaded(true)}
                 />
             </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getMediaDetails, getMediaTrailer, getMovieCredits, getRecommendations, getSeasonEpisodes } from '../api/media.api';
@@ -44,9 +44,10 @@ const MovieDetail = () => {
     const [selectedSeason, setSelectedSeason] = useState(1);
     const [selectedEpisode, setSelectedEpisode] = useState(1);
     const [activeServer, setActiveServer] = useState('vidking');
-    const [clickShield, setClickShield] = useState(true);
     const [episodes, setEpisodes] = useState([]);
     const [loadingEpisodes, setLoadingEpisodes] = useState(false);
+    const iframeRef = useRef(null);
+    const playerWrapperRef = useRef(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -351,6 +352,22 @@ const MovieDetail = () => {
                                             Now Playing
                                         </span>
                                         <button
+                                            onClick={() => {
+                                                const target = playerWrapperRef.current || iframeRef.current;
+                                                if (!target) return;
+                                                if (target.requestFullscreen) target.requestFullscreen();
+                                                else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+                                                else if (target.mozRequestFullScreen) target.mozRequestFullScreen();
+                                                else if (target.msRequestFullscreen) target.msRequestFullscreen();
+                                            }}
+                                            className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/15 text-white/40 hover:text-white transition-all duration-200"
+                                            aria-label="Fullscreen"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4h4m8 0h4v4m0 8v4h-4m-8 0H4v-4" />
+                                            </svg>
+                                        </button>
+                                        <button
                                             onClick={() => setShowPlayer(false)}
                                             className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/15 text-white/40 hover:text-white transition-all duration-200 hover:rotate-90"
                                         >
@@ -365,27 +382,16 @@ const MovieDetail = () => {
                             {/* ── Video Frame + Episode Sidebar ── */}
                             <div className={`flex ${mediaType === 'tv' ? 'flex-col lg:flex-row' : ''}`}>
                                 {/* Video Player */}
-                                <div className={`${mediaType === 'tv' ? 'w-full lg:flex-1' : 'w-full'} aspect-video bg-black relative`}>
-                                    {/* Click shield */}
-                                    {clickShield && (
-                                        <div
-                                            className="absolute inset-0 z-10 cursor-pointer"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setClickShield(false);
-                                            }}
-                                        />
-                                    )}
+                                <div ref={playerWrapperRef} className={`${mediaType === 'tv' ? 'w-full lg:flex-1' : 'w-full'} aspect-video bg-black relative`}>
                                     <iframe
+                                        ref={iframeRef}
                                         key={`${activeServer}-${selectedSeason}-${selectedEpisode}`}
                                         src={currentUrl}
                                         title="Video Player"
                                         className="w-full h-full"
                                         frameBorder="0"
                                         allowFullScreen
-                                        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                                        onLoad={() => setClickShield(true)}
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
                                     />
                                 </div>
 
